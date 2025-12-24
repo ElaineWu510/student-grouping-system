@@ -5,6 +5,10 @@
 
 // Initialize storage
 const STORAGE_KEY = 'studentGroupingData';
+const ADMIN_SESSION_KEY = 'adminLoggedIn';
+
+// Admin password (encoded for basic protection)
+const ADMIN_PASSWORD = 'elaine510510';
 
 // Load data from localStorage
 function loadData() {
@@ -16,6 +20,64 @@ function loadData() {
 function saveData(students) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
 }
+
+// Check if admin is logged in
+function isAdminLoggedIn() {
+    return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
+}
+
+// Set admin login status
+function setAdminLogin(status) {
+    if (status) {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+    } else {
+        sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    }
+}
+
+// Update admin UI based on login status
+function updateAdminUI() {
+    const loginSection = document.getElementById('adminLogin');
+    const contentSection = document.getElementById('adminContent');
+    
+    if (isAdminLoggedIn()) {
+        loginSection.classList.add('hidden');
+        contentSection.classList.remove('hidden');
+        refreshAdminData();
+    } else {
+        loginSection.classList.remove('hidden');
+        contentSection.classList.add('hidden');
+    }
+}
+
+// ==========================================
+// Admin Login
+// ==========================================
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const password = document.getElementById('adminPassword').value;
+    const errorMsg = document.getElementById('loginError');
+    
+    if (password === ADMIN_PASSWORD) {
+        setAdminLogin(true);
+        updateAdminUI();
+        document.getElementById('adminPassword').value = '';
+        errorMsg.classList.add('hidden');
+    } else {
+        errorMsg.classList.remove('hidden');
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPassword').focus();
+    }
+});
+
+// Logout function
+document.getElementById('logoutBtn').addEventListener('click', function() {
+    if (confirm('確定要登出嗎？')) {
+        setAdminLogin(false);
+        updateAdminUI();
+    }
+});
 
 // ==========================================
 // Tab Navigation
@@ -31,9 +93,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         
-        // If switching to admin, refresh data
+        // If switching to admin, check login status and refresh data
         if (tabId === 'admin') {
-            refreshAdminData();
+            updateAdminUI();
         }
     });
 });
@@ -509,5 +571,6 @@ document.getElementById('clearData').addEventListener('click', clearData);
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
-    refreshAdminData();
+    // Check admin login status on page load
+    updateAdminUI();
 });

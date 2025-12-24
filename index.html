@@ -351,6 +351,33 @@
 
         <!-- Admin Section -->
         <section id="admin" class="section">
+            <!-- Password Login -->
+            <div id="adminLogin" class="admin-login">
+                <div class="login-card">
+                    <div class="login-icon">🔐</div>
+                    <h2>管理後台登入</h2>
+                    <p>請輸入管理員密碼</p>
+                    <form id="loginForm" class="login-form">
+                        <div class="form-group">
+                            <input type="password" id="adminPassword" placeholder="請輸入密碼" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span>登入</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                    </form>
+                    <p id="loginError" class="login-error hidden">密碼錯誤，請重新輸入</p>
+                </div>
+            </div>
+
+            <!-- Admin Content (Hidden until login) -->
+            <div id="adminContent" class="admin-content hidden">
+                <div class="admin-toolbar">
+                    <button id="logoutBtn" class="btn btn-logout">
+                        <span>🚪</span> 登出
+                    </button>
+                </div>
+                
             <div class="admin-header">
                 <h2>管理後台</h2>
                 <p>查看學生問卷資料並進行智慧分組</p>
@@ -457,9 +484,8 @@
                     </div>
                 </div>
             </div>
+            </div> <!-- End of adminContent -->
         </section>
-
-        <!-- Footer -->
         <footer class="footer">
             <p>© 2025 國立東華大學 資訊管理學系 | 教學實踐研究計畫</p>
         </footer>
