@@ -896,3 +896,46 @@ tr:hover {
 .btn-logout:hover {
     background: #7f8c8d;
 }
+
+/* Form Error Styles */
+.form-error {
+    border: 2px solid var(--danger) !important;
+    border-radius: var(--radius-sm);
+    background: #fff5f5 !important;
+    position: relative;
+    animation: errorPulse 0.5s ease;
+}
+
+@keyframes errorPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.01); }
+}
+
+.form-error input,
+.form-error select {
+    border-color: var(--danger) !important;
+}
+
+.error-message {
+    display: block;
+    color: var(--danger);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 8px;
+    padding: 5px 10px;
+    background: #ffe6e6;
+    border-radius: 4px;
+}
+
+/* Improved form group styling for errors */
+.form-group.form-error {
+    padding: 10px;
+    margin: -10px;
+    margin-bottom: 20px;
+}
+
+.likert-item.form-error,
+.cognitive-item.form-error,
+.skill-item.form-error {
+    border-left: 4px solid var(--danger) !important;
+}

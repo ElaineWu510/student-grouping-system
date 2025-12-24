@@ -61,9 +61,9 @@
                         <div class="form-group">
                             <label for="classSection">班級 Class <span class="required">*</span></label>
                             <select id="classSection" name="classSection" required>
-                                <option value="">請選擇班級</option>
-                                <option value="A">A班 (70人)</option>
-                                <option value="B">B班 (25人)</option>
+                                <option value="">請選擇班級 / Select your class</option>
+                                <option value="A">MIS (9:00-12:00) 全英授課 30人 | DMSI20090、MSF_10180</option>
+                                <option value="B">管理資訊系統 (2:00-5:00) 中文授課 70人 | IM__10600</option>
                             </select>
                         </div>
 
@@ -392,17 +392,17 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">📊</div>
+                    <div class="stat-icon">🌐</div>
                     <div class="stat-content">
                         <span class="stat-number" id="classACount">0</span>
-                        <span class="stat-label">A班學生</span>
+                        <span class="stat-label">MIS 全英班</span>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">📈</div>
+                    <div class="stat-icon">📚</div>
                     <div class="stat-content">
                         <span class="stat-number" id="classBCount">0</span>
-                        <span class="stat-label">B班學生</span>
+                        <span class="stat-label">管理資訊系統 中文班</span>
                     </div>
                 </div>
             </div>
@@ -415,8 +415,8 @@
                             每組人數：
                             <select id="groupSize">
                                 <option value="3">3人</option>
-                                <option value="4" selected>4人</option>
-                                <option value="5">5人</option>
+                                <option value="4">4人</option>
+                                <option value="5" selected>5人</option>
                             </select>
                         </label>
                         <label>
@@ -475,11 +475,11 @@
                 <h3>分組結果</h3>
                 <div class="class-groups">
                     <div class="class-section">
-                        <h4>A班分組</h4>
+                        <h4>MIS 全英班 (9:00-12:00)</h4>
                         <div id="classAGroups" class="groups-container"></div>
                     </div>
                     <div class="class-section">
-                        <h4>B班分組</h4>
+                        <h4>管理資訊系統 中文班 (2:00-5:00)</h4>
                         <div id="classBGroups" class="groups-container"></div>
                     </div>
                 </div>

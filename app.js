@@ -106,6 +106,28 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 document.getElementById('studentForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // Clear previous error highlights
+    clearAllErrors();
+    
+    // Validate form and get missing fields
+    const missingFields = validateForm();
+    
+    if (missingFields.length > 0) {
+        // Highlight missing fields and show alert
+        highlightMissingFields(missingFields);
+        
+        // Create alert message
+        const fieldNames = missingFields.map(f => f.label).join('\n• ');
+        alert(`請填寫以下必填欄位：\n\n• ${fieldNames}`);
+        
+        // Scroll to first missing field
+        const firstMissing = document.querySelector('.form-error');
+        if (firstMissing) {
+            firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
+    
     const formData = new FormData(this);
     
     // Calculate scores
@@ -190,6 +212,90 @@ document.getElementById('studentForm').addEventListener('submit', function(e) {
     }, 3000);
 });
 
+// Form validation function
+function validateForm() {
+    const missingFields = [];
+    
+    // Basic info fields
+    const basicFields = [
+        { name: 'studentId', label: '學號 Student ID' },
+        { name: 'studentName', label: '姓名 Name' },
+        { name: 'classSection', label: '班級 Class' }
+    ];
+    
+    basicFields.forEach(field => {
+        const element = document.querySelector(`[name="${field.name}"]`);
+        if (!element.value) {
+            missingFields.push({ ...field, element });
+        }
+    });
+    
+    // Radio button groups
+    const radioGroups = [
+        { name: 'motivation1', label: '學習動機 第1題', section: '學習動機' },
+        { name: 'motivation2', label: '學習動機 第2題', section: '學習動機' },
+        { name: 'motivation3', label: '學習動機 第3題', section: '學習動機' },
+        { name: 'efficacy1', label: '自我效能 第1題', section: '自我效能' },
+        { name: 'efficacy2', label: '自我效能 第2題', section: '自我效能' },
+        { name: 'efficacy3', label: '自我效能 第3題', section: '自我效能' },
+        { name: 'cognitive1', label: '認知風格 第1題', section: '認知風格' },
+        { name: 'cognitive2', label: '認知風格 第2題', section: '認知風格' },
+        { name: 'team1', label: '團隊合作偏好 第1題', section: '團隊合作偏好' },
+        { name: 'team2', label: '團隊合作偏好 第2題', section: '團隊合作偏好' },
+        { name: 'team3', label: '團隊合作偏好 第3題', section: '團隊合作偏好' },
+        { name: 'team4', label: '團隊合作偏好 第4題', section: '團隊合作偏好' },
+        { name: 'skill1', label: '技術能力自評 - 資訊系統概念', section: '技術能力自評' },
+        { name: 'skill2', label: '技術能力自評 - 簡報製作能力', section: '技術能力自評' },
+        { name: 'skill3', label: '技術能力自評 - 資料分析能力', section: '技術能力自評' },
+        { name: 'skill4', label: '技術能力自評 - 英文讀寫能力', section: '技術能力自評' }
+    ];
+    
+    radioGroups.forEach(group => {
+        const checked = document.querySelector(`input[name="${group.name}"]:checked`);
+        if (!checked) {
+            const firstRadio = document.querySelector(`input[name="${group.name}"]`);
+            missingFields.push({ ...group, element: firstRadio });
+        }
+    });
+    
+    return missingFields;
+}
+
+// Highlight missing fields
+function highlightMissingFields(fields) {
+    fields.forEach(field => {
+        if (field.element) {
+            // Find the parent container to highlight
+            let container = field.element.closest('.form-group') || 
+                           field.element.closest('.likert-item') || 
+                           field.element.closest('.cognitive-item') ||
+                           field.element.closest('.skill-item');
+            
+            if (container) {
+                container.classList.add('form-error');
+                
+                // Add error message if not exists
+                if (!container.querySelector('.error-message')) {
+                    const errorMsg = document.createElement('span');
+                    errorMsg.className = 'error-message';
+                    errorMsg.textContent = '⚠️ 此欄位必填';
+                    container.appendChild(errorMsg);
+                }
+            }
+        }
+    });
+}
+
+// Clear all error highlights
+function clearAllErrors() {
+    document.querySelectorAll('.form-error').forEach(el => {
+        el.classList.remove('form-error');
+    });
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.remove();
+    });
+}
+
 // ==========================================
 // Utility Functions
 // ==========================================
@@ -235,10 +341,11 @@ function refreshAdminData() {
     
     students.forEach(student => {
         const row = document.createElement('tr');
+        const classDisplay = student.classSection === 'A' ? 'MIS 全英' : '管資 中文';
         row.innerHTML = `
             <td>${student.studentId}</td>
             <td>${student.studentName}</td>
-            <td>${student.classSection}班</td>
+            <td>${classDisplay}</td>
             <td>${student.motivationScore}</td>
             <td>${student.efficacyScore}</td>
             <td>${student.teamScore}</td>
@@ -404,6 +511,8 @@ function displayGroups(containerId, groups, className) {
         return;
     }
     
+    const classDisplayName = className === 'A' ? 'MIS' : '管資';
+    
     groups.forEach((group, index) => {
         const card = document.createElement('div');
         card.className = 'group-card';
@@ -420,7 +529,7 @@ function displayGroups(containerId, groups, className) {
         
         card.innerHTML = `
             <div class="group-header">
-                <span class="group-name">${className}班 第${index + 1}組</span>
+                <span class="group-name">${classDisplayName} 第${index + 1}組</span>
                 <span class="group-size">${group.length}人</span>
             </div>
             <ul class="group-members">
@@ -457,13 +566,14 @@ function downloadReport() {
 
 產生時間：${dateStr} ${timeStr}
 總學生數：${students.length} 人
-A班學生：${students.filter(s => s.classSection === 'A').length} 人
-B班學生：${students.filter(s => s.classSection === 'B').length} 人
+MIS 全英班 (DMSI20090、MSF_10180)：${students.filter(s => s.classSection === 'A').length} 人
+管理資訊系統 中文班 (IM__10600)：${students.filter(s => s.classSection === 'B').length} 人
 分組策略：${document.getElementById('groupStrategy').selectedOptions[0].text}
 每組人數：${document.getElementById('groupSize').value} 人
 
 ================================================================================
-                              A班分組結果
+                    MIS 全英班分組結果 (9:00-12:00)
+                    DMSI20090、MSF_10180
 ================================================================================
 `;
     
@@ -477,7 +587,8 @@ B班學生：${students.filter(s => s.classSection === 'B').length} 人
     
     report += `
 ================================================================================
-                              B班分組結果
+                 管理資訊系統 中文班分組結果 (2:00-5:00)
+                          IM__10600
 ================================================================================
 `;
     
