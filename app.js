@@ -1,687 +1,804 @@
 // ==========================================
-// Team Learning Grouping System
-// 團隊學習分組系統
+// Team Learning Grouping System v2
+// 團隊學習分組系統 - 安全版本
+// 密碼驗證在後端進行，前端不存放密碼
 // ==========================================
 
-// Initialize storage
-const STORAGE_KEY = 'studentGroupingData';
-const ADMIN_SESSION_KEY = 'adminLoggedIn';
+// ============ 重要設定 ============
+// 請將以下 URL 替換為您的 Google Apps Script Web App URL
+const GOOGLE_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbzo0YL4Od_TNY8kp9x1ge05TpMcQoBz1iORiBQjNPJfH813kaWaSOYNovwPKDBjAFfV4A/exec";
 
-// Admin password (encoded for basic protection)
-const ADMIN_PASSWORD = 'elaine510510';
+// Session storage keys
+const ADMIN_SESSION_KEY = "adminLoggedIn";
 
-// Load data from localStorage
-function loadData() {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
+// Local cache for admin data
+let cachedStudents = [];
+let adminPassword = ""; // 暫存密碼用於後續 API 請求（只在記憶體中，不存檔）
+
+// ==========================================
+// Check URL for admin access
+// ==========================================
+function checkAdminAccess() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAdmin = urlParams.get("admin") === "true";
+
+  if (isAdmin) {
+    document.getElementById("navTabs").classList.remove("hidden");
+  }
 }
 
-// Save data to localStorage
-function saveData(students) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
-}
-
-// Check if admin is logged in
+// ==========================================
+// Admin Login Functions
+// ==========================================
 function isAdminLoggedIn() {
-    return sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true';
+  return (
+    sessionStorage.getItem(ADMIN_SESSION_KEY) === "true" && adminPassword !== ""
+  );
 }
 
-// Set admin login status
-function setAdminLogin(status) {
-    if (status) {
-        sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
-    } else {
-        sessionStorage.removeItem(ADMIN_SESSION_KEY);
-    }
+function setAdminLogin(status, password = "") {
+  if (status && password) {
+    sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
+    adminPassword = password;
+  } else {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    adminPassword = "";
+  }
 }
 
-// Update admin UI based on login status
 function updateAdminUI() {
-    const loginSection = document.getElementById('adminLogin');
-    const contentSection = document.getElementById('adminContent');
-    
-    if (isAdminLoggedIn()) {
-        loginSection.classList.add('hidden');
-        contentSection.classList.remove('hidden');
-        refreshAdminData();
-    } else {
-        loginSection.classList.remove('hidden');
-        contentSection.classList.add('hidden');
-    }
+  const loginSection = document.getElementById("adminLogin");
+  const contentSection = document.getElementById("adminContent");
+
+  if (isAdminLoggedIn()) {
+    loginSection.classList.add("hidden");
+    contentSection.classList.remove("hidden");
+    loadStudentData();
+  } else {
+    loginSection.classList.remove("hidden");
+    contentSection.classList.add("hidden");
+  }
 }
-
-// ==========================================
-// Admin Login
-// ==========================================
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const password = document.getElementById('adminPassword').value;
-    const errorMsg = document.getElementById('loginError');
-    
-    if (password === ADMIN_PASSWORD) {
-        setAdminLogin(true);
-        updateAdminUI();
-        document.getElementById('adminPassword').value = '';
-        errorMsg.classList.add('hidden');
-    } else {
-        errorMsg.classList.remove('hidden');
-        document.getElementById('adminPassword').value = '';
-        document.getElementById('adminPassword').focus();
-    }
-});
-
-// Logout function
-document.getElementById('logoutBtn').addEventListener('click', function() {
-    if (confirm('確定要登出嗎？')) {
-        setAdminLogin(false);
-        updateAdminUI();
-    }
-});
 
 // ==========================================
 // Tab Navigation
 // ==========================================
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Update tab buttons
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        // Update sections
-        const tabId = btn.dataset.tab;
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        
-        // If switching to admin, check login status and refresh data
-        if (tabId === 'admin') {
-            updateAdminUI();
-        }
-    });
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll(".tab-btn")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const tabId = btn.dataset.tab;
+    document
+      .querySelectorAll(".section")
+      .forEach((s) => s.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+
+    if (tabId === "admin") {
+      updateAdminUI();
+    }
+  });
+});
+
+// ==========================================
+// Login Form Handler (Backend Verification)
+// ==========================================
+document
+  .getElementById("loginForm")
+  .addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const password = document.getElementById("adminPassword").value;
+    const errorMsg = document.getElementById("loginError");
+    const submitBtn = this.querySelector('button[type="submit"]');
+
+    if (!password) {
+      errorMsg.textContent = "請輸入密碼";
+      errorMsg.classList.remove("hidden");
+      return;
+    }
+
+    // Disable button during verification
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "<span>驗證中...</span>";
+
+    try {
+      if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+        // 如果未設定後端，顯示錯誤
+        errorMsg.textContent = "系統尚未設定完成，請聯繫管理員";
+        errorMsg.classList.remove("hidden");
+        return;
+      }
+
+      // Verify password with backend
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify_password",
+          password: password,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.verified) {
+        setAdminLogin(true, password);
+        updateAdminUI();
+        document.getElementById("adminPassword").value = "";
+        errorMsg.classList.add("hidden");
+      } else {
+        errorMsg.textContent = "密碼錯誤，請重新輸入";
+        errorMsg.classList.remove("hidden");
+        document.getElementById("adminPassword").value = "";
+        document.getElementById("adminPassword").focus();
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      errorMsg.textContent = "連線錯誤，請稍後再試";
+      errorMsg.classList.remove("hidden");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>登入</span><span class="btn-icon">→</span>';
+    }
+  });
+
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", function () {
+  if (confirm("確定要登出嗎？")) {
+    setAdminLogin(false);
+    cachedStudents = [];
+    updateAdminUI();
+  }
 });
 
 // ==========================================
 // Student Form Submission
 // ==========================================
-document.getElementById('studentForm').addEventListener('submit', function(e) {
+document
+  .getElementById("studentForm")
+  .addEventListener("submit", async function (e) {
     e.preventDefault();
-    
-    // Clear previous error highlights
+
+    // Clear previous errors
     clearAllErrors();
-    
-    // Validate form and get missing fields
+
+    // Validate form
     const missingFields = validateForm();
-    
+
     if (missingFields.length > 0) {
-        // Highlight missing fields and show alert
-        highlightMissingFields(missingFields);
-        
-        // Create alert message
-        const fieldNames = missingFields.map(f => f.label).join('\n• ');
-        alert(`請填寫以下必填欄位：\n\n• ${fieldNames}`);
-        
-        // Scroll to first missing field
-        const firstMissing = document.querySelector('.form-error');
-        if (firstMissing) {
-            firstMissing.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
+      highlightMissingFields(missingFields);
+      const fieldNames = missingFields.map((f) => f.label).join("\n• ");
+      alert(`請填寫以下必填欄位：\n\n• ${fieldNames}`);
+      const firstMissing = document.querySelector(".form-error");
+      if (firstMissing) {
+        firstMissing.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
     }
-    
+
+    // Show loading
+    showLoading();
+
     const formData = new FormData(this);
-    
+
     // Calculate scores
     const motivationScore = calculateAverage([
-        formData.get('motivation1'),
-        formData.get('motivation2'),
-        formData.get('motivation3')
+      formData.get("motivation1"),
+      formData.get("motivation2"),
+      formData.get("motivation3"),
     ]);
-    
+
     const efficacyScore = calculateAverage([
-        formData.get('efficacy1'),
-        formData.get('efficacy2'),
-        formData.get('efficacy3')
+      formData.get("efficacy1"),
+      formData.get("efficacy2"),
+      formData.get("efficacy3"),
     ]);
-    
+
     const teamScore = calculateAverage([
-        formData.get('team1'),
-        formData.get('team2'),
-        formData.get('team3'),
-        formData.get('team4')
+      formData.get("team1"),
+      formData.get("team2"),
+      formData.get("team3"),
+      formData.get("team4"),
     ]);
-    
+
     const skillScore = calculateAverage([
-        formData.get('skill1'),
-        formData.get('skill2'),
-        formData.get('skill3'),
-        formData.get('skill4')
+      formData.get("skill1"),
+      formData.get("skill2"),
+      formData.get("skill3"),
+      formData.get("skill4"),
     ]);
-    
-    // Determine role tendency based on team preferences
+
     const roleTendency = determineRole(
-        parseInt(formData.get('team1')),
-        parseInt(formData.get('team2')),
-        parseInt(formData.get('team3')),
-        parseInt(formData.get('team4'))
+      parseInt(formData.get("team1")),
+      parseInt(formData.get("team2")),
+      parseInt(formData.get("team3")),
+      parseInt(formData.get("team4")),
     );
-    
-    // Determine cognitive style
-    const cognitiveStyle = `${formData.get('cognitive1')}-${formData.get('cognitive2')}`;
-    
-    // Create student object
-    const student = {
-        id: Date.now(),
-        studentId: formData.get('studentId'),
-        studentName: formData.get('studentName'),
-        classSection: formData.get('classSection'),
-        email: formData.get('email') || '',
-        motivationScore: motivationScore,
-        efficacyScore: efficacyScore,
-        teamScore: teamScore,
-        skillScore: skillScore,
-        cognitiveStyle: cognitiveStyle,
-        roleTendency: roleTendency,
-        submittedAt: new Date().toISOString()
+
+    const cognitiveStyle = `${formData.get("cognitive1")}-${formData.get("cognitive2")}`;
+
+    // Create student data object
+    const studentData = {
+      studentId: formData.get("studentId"),
+      studentName: formData.get("studentName"),
+      classSection: formData.get("classSection"),
+      email: formData.get("email") || "",
+      motivationScore: motivationScore,
+      efficacyScore: efficacyScore,
+      teamScore: teamScore,
+      skillScore: skillScore,
+      cognitiveStyle: cognitiveStyle,
+      roleTendency: roleTendency,
+      submittedAt: new Date().toISOString(),
     };
-    
-    // Check for duplicate student ID
-    const students = loadData();
-    const existingIndex = students.findIndex(s => s.studentId === student.studentId);
-    
-    if (existingIndex !== -1) {
-        if (confirm('此學號已存在，是否要更新資料？')) {
-            students[existingIndex] = student;
-        } else {
-            return;
-        }
-    } else {
-        students.push(student);
+
+    try {
+      if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+        throw new Error("Backend not configured");
+      }
+
+      // Submit to Google Sheets
+      const response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "submit",
+          studentData: studentData,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        hideLoading();
+        showSuccess();
+      } else {
+        throw new Error(result.error || "提交失敗");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      hideLoading();
+      document.getElementById("errorText").textContent =
+        "提交失敗，請稍後再試或聯繫老師。";
+      document.querySelector(".questionnaire-card").classList.add("hidden");
+      document.getElementById("errorMessage").classList.remove("hidden");
     }
-    
-    saveData(students);
-    
-    // Show success message
-    document.querySelector('.questionnaire-card').classList.add('hidden');
-    document.getElementById('successMessage').classList.remove('hidden');
-    
-    // Reset form after delay
-    setTimeout(() => {
-        this.reset();
-        document.querySelector('.questionnaire-card').classList.remove('hidden');
-        document.getElementById('successMessage').classList.add('hidden');
-    }, 3000);
-});
+  });
 
-// Form validation function
-function validateForm() {
-    const missingFields = [];
-    
-    // Basic info fields
-    const basicFields = [
-        { name: 'studentId', label: '學號 Student ID' },
-        { name: 'studentName', label: '姓名 Name' },
-        { name: 'classSection', label: '班級 Class' }
-    ];
-    
-    basicFields.forEach(field => {
-        const element = document.querySelector(`[name="${field.name}"]`);
-        if (!element.value) {
-            missingFields.push({ ...field, element });
-        }
+// ==========================================
+// Load Student Data (Admin - Requires Password)
+// ==========================================
+async function loadStudentData() {
+  if (!adminPassword) {
+    alert("請先登入");
+    updateAdminUI();
+    return;
+  }
+
+  try {
+    if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+      throw new Error("Backend not configured");
+    }
+
+    // Load from Google Sheets with password
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "get_data",
+        password: adminPassword,
+      }),
     });
-    
-    // Radio button groups
-    const radioGroups = [
-        { name: 'motivation1', label: '學習動機 第1題', section: '學習動機' },
-        { name: 'motivation2', label: '學習動機 第2題', section: '學習動機' },
-        { name: 'motivation3', label: '學習動機 第3題', section: '學習動機' },
-        { name: 'efficacy1', label: '自我效能 第1題', section: '自我效能' },
-        { name: 'efficacy2', label: '自我效能 第2題', section: '自我效能' },
-        { name: 'efficacy3', label: '自我效能 第3題', section: '自我效能' },
-        { name: 'cognitive1', label: '認知風格 第1題', section: '認知風格' },
-        { name: 'cognitive2', label: '認知風格 第2題', section: '認知風格' },
-        { name: 'team1', label: '團隊合作偏好 第1題', section: '團隊合作偏好' },
-        { name: 'team2', label: '團隊合作偏好 第2題', section: '團隊合作偏好' },
-        { name: 'team3', label: '團隊合作偏好 第3題', section: '團隊合作偏好' },
-        { name: 'team4', label: '團隊合作偏好 第4題', section: '團隊合作偏好' },
-        { name: 'skill1', label: '技術能力自評 - 資訊系統概念', section: '技術能力自評' },
-        { name: 'skill2', label: '技術能力自評 - 簡報製作能力', section: '技術能力自評' },
-        { name: 'skill3', label: '技術能力自評 - 資料分析能力', section: '技術能力自評' },
-        { name: 'skill4', label: '技術能力自評 - 英文讀寫能力', section: '技術能力自評' }
-    ];
-    
-    radioGroups.forEach(group => {
-        const checked = document.querySelector(`input[name="${group.name}"]:checked`);
-        if (!checked) {
-            const firstRadio = document.querySelector(`input[name="${group.name}"]`);
-            missingFields.push({ ...group, element: firstRadio });
-        }
-    });
-    
-    return missingFields;
+
+    const result = await response.json();
+
+    if (result.success) {
+      cachedStudents = result.data || [];
+    } else {
+      if (result.error === "密碼錯誤") {
+        alert("密碼驗證失敗，請重新登入");
+        setAdminLogin(false);
+        updateAdminUI();
+        return;
+      }
+      throw new Error(result.error || "載入失敗");
+    }
+  } catch (error) {
+    console.error("Error loading data:", error);
+    alert("載入資料失敗：" + error.message);
+    cachedStudents = [];
+  }
+
+  refreshAdminDisplay();
 }
 
-// Highlight missing fields
-function highlightMissingFields(fields) {
-    fields.forEach(field => {
-        if (field.element) {
-            // Find the parent container to highlight
-            let container = field.element.closest('.form-group') || 
-                           field.element.closest('.likert-item') || 
-                           field.element.closest('.cognitive-item') ||
-                           field.element.closest('.skill-item');
-            
-            if (container) {
-                container.classList.add('form-error');
-                
-                // Add error message if not exists
-                if (!container.querySelector('.error-message')) {
-                    const errorMsg = document.createElement('span');
-                    errorMsg.className = 'error-message';
-                    errorMsg.textContent = '⚠️ 此欄位必填';
-                    container.appendChild(errorMsg);
-                }
-            }
-        }
-    });
-}
+function refreshAdminDisplay() {
+  // Update stats
+  document.getElementById("totalStudents").textContent = cachedStudents.length;
+  document.getElementById("classACount").textContent = cachedStudents.filter(
+    (s) => s.classSection === "A",
+  ).length;
+  document.getElementById("classBCount").textContent = cachedStudents.filter(
+    (s) => s.classSection === "B",
+  ).length;
 
-// Clear all error highlights
-function clearAllErrors() {
-    document.querySelectorAll('.form-error').forEach(el => {
-        el.classList.remove('form-error');
-    });
-    document.querySelectorAll('.error-message').forEach(el => {
-        el.remove();
-    });
+  // Update table
+  const tbody = document.getElementById("studentTableBody");
+  tbody.innerHTML = "";
+
+  if (cachedStudents.length === 0) {
+    tbody.innerHTML =
+      '<tr><td colspan="8" style="text-align: center; color: #7f8c8d;">目前沒有學生資料</td></tr>';
+    return;
+  }
+
+  cachedStudents.forEach((student) => {
+    const row = document.createElement("tr");
+    const classDisplay =
+      student.classSection === "A" ? "MIS 全英" : "管資 中文";
+    row.innerHTML = `
+            <td>${student.studentId || "-"}</td>
+            <td>${student.studentName || "-"}</td>
+            <td>${classDisplay}</td>
+            <td>${student.motivationScore || "-"}</td>
+            <td>${student.efficacyScore || "-"}</td>
+            <td>${student.teamScore || "-"}</td>
+            <td>${formatCognitiveStyle(student.cognitiveStyle)}</td>
+            <td><span class="member-role">${student.roleTendency || "-"}</span></td>
+        `;
+    tbody.appendChild(row);
+  });
 }
 
 // ==========================================
 // Utility Functions
 // ==========================================
 function calculateAverage(values) {
-    const nums = values.map(v => parseInt(v)).filter(v => !isNaN(v));
-    return nums.length > 0 ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2) : 0;
+  const nums = values.map((v) => parseInt(v)).filter((v) => !isNaN(v));
+  return nums.length > 0
+    ? (nums.reduce((a, b) => a + b, 0) / nums.length).toFixed(2)
+    : 0;
 }
 
 function determineRole(leadership, coordination, execution, creativity) {
-    const roles = {
-        'leader': leadership,
-        'coordinator': coordination,
-        'executor': execution,
-        'innovator': creativity
-    };
-    
-    const maxRole = Object.entries(roles).reduce((a, b) => a[1] > b[1] ? a : b);
-    
-    const roleNames = {
-        'leader': '領導者',
-        'coordinator': '協調者',
-        'executor': '執行者',
-        'innovator': '創意者'
-    };
-    
-    return roleNames[maxRole[0]];
-}
+  const roles = {
+    leader: leadership || 0,
+    coordinator: coordination || 0,
+    executor: execution || 0,
+    innovator: creativity || 0,
+  };
 
-// ==========================================
-// Admin Functions
-// ==========================================
-function refreshAdminData() {
-    const students = loadData();
-    
-    // Update stats
-    document.getElementById('totalStudents').textContent = students.length;
-    document.getElementById('classACount').textContent = students.filter(s => s.classSection === 'A').length;
-    document.getElementById('classBCount').textContent = students.filter(s => s.classSection === 'B').length;
-    
-    // Update table
-    const tbody = document.getElementById('studentTableBody');
-    tbody.innerHTML = '';
-    
-    students.forEach(student => {
-        const row = document.createElement('tr');
-        const classDisplay = student.classSection === 'A' ? 'MIS 全英' : '管資 中文';
-        row.innerHTML = `
-            <td>${student.studentId}</td>
-            <td>${student.studentName}</td>
-            <td>${classDisplay}</td>
-            <td>${student.motivationScore}</td>
-            <td>${student.efficacyScore}</td>
-            <td>${student.teamScore}</td>
-            <td>${formatCognitiveStyle(student.cognitiveStyle)}</td>
-            <td><span class="member-role">${student.roleTendency}</span></td>
-        `;
-        tbody.appendChild(row);
-    });
+  const maxRole = Object.entries(roles).reduce((a, b) => (a[1] > b[1] ? a : b));
+
+  const roleNames = {
+    leader: "領導者",
+    coordinator: "協調者",
+    executor: "執行者",
+    innovator: "創意者",
+  };
+
+  return roleNames[maxRole[0]];
 }
 
 function formatCognitiveStyle(style) {
-    const parts = style.split('-');
-    const styles = {
-        'holist': '整體',
-        'serialist': '循序',
-        'intuitive': '直覺',
-        'analytical': '分析'
-    };
-    return `${styles[parts[0]] || parts[0]}/${styles[parts[1]] || parts[1]}`;
+  if (!style) return "-";
+  const parts = style.split("-");
+  const styles = {
+    holist: "整體",
+    serialist: "循序",
+    intuitive: "直覺",
+    analytical: "分析",
+  };
+  return `${styles[parts[0]] || parts[0]}/${styles[parts[1]] || parts[1]}`;
 }
 
 // ==========================================
-// Intelligent Grouping Algorithm
+// Form Validation
+// ==========================================
+function validateForm() {
+  const missingFields = [];
+
+  const basicFields = [
+    { name: "studentId", label: "學號 Student ID" },
+    { name: "studentName", label: "姓名 Name" },
+    { name: "classSection", label: "班級 Class" },
+  ];
+
+  basicFields.forEach((field) => {
+    const element = document.querySelector(`[name="${field.name}"]`);
+    if (!element.value) {
+      missingFields.push({ ...field, element });
+    }
+  });
+
+  const radioGroups = [
+    { name: "motivation1", label: "學習動機 第1題" },
+    { name: "motivation2", label: "學習動機 第2題" },
+    { name: "motivation3", label: "學習動機 第3題" },
+    { name: "efficacy1", label: "自我效能 第1題" },
+    { name: "efficacy2", label: "自我效能 第2題" },
+    { name: "efficacy3", label: "自我效能 第3題" },
+    { name: "cognitive1", label: "認知風格 第1題" },
+    { name: "cognitive2", label: "認知風格 第2題" },
+    { name: "team1", label: "團隊合作偏好 第1題" },
+    { name: "team2", label: "團隊合作偏好 第2題" },
+    { name: "team3", label: "團隊合作偏好 第3題" },
+    { name: "team4", label: "團隊合作偏好 第4題" },
+    { name: "skill1", label: "技術能力 - 資訊系統概念" },
+    { name: "skill2", label: "技術能力 - 簡報製作能力" },
+    { name: "skill3", label: "技術能力 - 資料分析能力" },
+    { name: "skill4", label: "技術能力 - 英文讀寫能力" },
+  ];
+
+  radioGroups.forEach((group) => {
+    const checked = document.querySelector(
+      `input[name="${group.name}"]:checked`,
+    );
+    if (!checked) {
+      const firstRadio = document.querySelector(`input[name="${group.name}"]`);
+      missingFields.push({ ...group, element: firstRadio });
+    }
+  });
+
+  return missingFields;
+}
+
+function highlightMissingFields(fields) {
+  fields.forEach((field) => {
+    if (field.element) {
+      let container =
+        field.element.closest(".form-group") ||
+        field.element.closest(".likert-item") ||
+        field.element.closest(".cognitive-item") ||
+        field.element.closest(".skill-item");
+
+      if (container) {
+        container.classList.add("form-error");
+
+        if (!container.querySelector(".error-message")) {
+          const errorMsg = document.createElement("span");
+          errorMsg.className = "error-message";
+          errorMsg.textContent = "⚠️ 此欄位必填";
+          container.appendChild(errorMsg);
+        }
+      }
+    }
+  });
+}
+
+function clearAllErrors() {
+  document
+    .querySelectorAll(".form-error")
+    .forEach((el) => el.classList.remove("form-error"));
+  document.querySelectorAll(".error-message").forEach((el) => el.remove());
+}
+
+// ==========================================
+// UI Helpers
+// ==========================================
+function showLoading() {
+  document.getElementById("loadingOverlay").classList.remove("hidden");
+  document.getElementById("submitBtn").disabled = true;
+}
+
+function hideLoading() {
+  document.getElementById("loadingOverlay").classList.add("hidden");
+  document.getElementById("submitBtn").disabled = false;
+}
+
+function showSuccess() {
+  document.querySelector(".questionnaire-card").classList.add("hidden");
+  document.getElementById("successMessage").classList.remove("hidden");
+}
+
+function hideError() {
+  document.getElementById("errorMessage").classList.add("hidden");
+  document.querySelector(".questionnaire-card").classList.remove("hidden");
+}
+
+// ==========================================
+// Grouping Functions
 // ==========================================
 function generateGroups() {
-    const students = loadData();
-    const groupSize = parseInt(document.getElementById('groupSize').value);
-    const strategy = document.getElementById('groupStrategy').value;
-    
-    if (students.length === 0) {
-        alert('目前沒有學生資料，請先填寫問卷！');
-        return;
-    }
-    
-    // Separate by class
-    const classA = students.filter(s => s.classSection === 'A');
-    const classB = students.filter(s => s.classSection === 'B');
-    
-    // Generate groups for each class
-    const groupsA = createGroups(classA, groupSize, strategy);
-    const groupsB = createGroups(classB, groupSize, strategy);
-    
-    // Display results
-    displayGroups('classAGroups', groupsA, 'A');
-    displayGroups('classBGroups', groupsB, 'B');
-    
-    document.getElementById('groupingResults').classList.remove('hidden');
-    
-    // Store grouping results
-    localStorage.setItem('groupingResultsA', JSON.stringify(groupsA));
-    localStorage.setItem('groupingResultsB', JSON.stringify(groupsB));
+  if (cachedStudents.length === 0) {
+    alert("目前沒有學生資料！請先點擊「重新載入資料」");
+    return;
+  }
+
+  const groupSize = parseInt(document.getElementById("groupSize").value);
+  const strategy = document.getElementById("groupStrategy").value;
+
+  const classA = cachedStudents.filter((s) => s.classSection === "A");
+  const classB = cachedStudents.filter((s) => s.classSection === "B");
+
+  const groupsA = createGroups(classA, groupSize, strategy);
+  const groupsB = createGroups(classB, groupSize, strategy);
+
+  displayGroups("classAGroups", groupsA, "A");
+  displayGroups("classBGroups", groupsB, "B");
+
+  document.getElementById("groupingResults").classList.remove("hidden");
+
+  // Store for report download
+  localStorage.setItem("groupingResultsA", JSON.stringify(groupsA));
+  localStorage.setItem("groupingResultsB", JSON.stringify(groupsB));
 }
 
 function createGroups(students, groupSize, strategy) {
-    if (students.length === 0) return [];
-    
-    let sortedStudents;
-    
-    switch (strategy) {
-        case 'heterogeneous':
-            // Sort by composite score for heterogeneous grouping
-            sortedStudents = [...students].sort((a, b) => {
-                const scoreA = parseFloat(a.motivationScore) + parseFloat(a.efficacyScore) + parseFloat(a.teamScore);
-                const scoreB = parseFloat(b.motivationScore) + parseFloat(b.efficacyScore) + parseFloat(b.teamScore);
-                return scoreB - scoreA;
-            });
-            return createHeterogeneousGroups(sortedStudents, groupSize);
-            
-        case 'homogeneous':
-            // Sort and group similar students together
-            sortedStudents = [...students].sort((a, b) => {
-                const scoreA = parseFloat(a.motivationScore) + parseFloat(a.efficacyScore);
-                const scoreB = parseFloat(b.motivationScore) + parseFloat(b.efficacyScore);
-                return scoreB - scoreA;
-            });
-            return createHomogeneousGroups(sortedStudents, groupSize);
-            
-        case 'balanced':
-            // Balance based on roles
-            return createBalancedGroups(students, groupSize);
-            
-        default:
-            return createHeterogeneousGroups(students, groupSize);
-    }
+  if (students.length === 0) return [];
+
+  let sortedStudents;
+
+  switch (strategy) {
+    case "heterogeneous":
+      sortedStudents = [...students].sort((a, b) => {
+        const scoreA =
+          parseFloat(a.motivationScore || 0) +
+          parseFloat(a.efficacyScore || 0) +
+          parseFloat(a.teamScore || 0);
+        const scoreB =
+          parseFloat(b.motivationScore || 0) +
+          parseFloat(b.efficacyScore || 0) +
+          parseFloat(b.teamScore || 0);
+        return scoreB - scoreA;
+      });
+      return createHeterogeneousGroups(sortedStudents, groupSize);
+
+    case "homogeneous":
+      sortedStudents = [...students].sort((a, b) => {
+        const scoreA =
+          parseFloat(a.motivationScore || 0) + parseFloat(a.efficacyScore || 0);
+        const scoreB =
+          parseFloat(b.motivationScore || 0) + parseFloat(b.efficacyScore || 0);
+        return scoreB - scoreA;
+      });
+      return createHomogeneousGroups(sortedStudents, groupSize);
+
+    case "balanced":
+      return createBalancedGroups(students, groupSize);
+
+    default:
+      return createHeterogeneousGroups(students, groupSize);
+  }
 }
 
 function createHeterogeneousGroups(students, groupSize) {
-    const numGroups = Math.ceil(students.length / groupSize);
-    const groups = Array.from({ length: numGroups }, () => []);
-    
-    // Distribute students using snake draft
-    let direction = 1;
-    let groupIndex = 0;
-    
-    students.forEach((student, index) => {
-        groups[groupIndex].push(student);
-        
-        if (direction === 1) {
-            groupIndex++;
-            if (groupIndex >= numGroups) {
-                groupIndex = numGroups - 1;
-                direction = -1;
-            }
-        } else {
-            groupIndex--;
-            if (groupIndex < 0) {
-                groupIndex = 0;
-                direction = 1;
-            }
-        }
-    });
-    
-    return groups;
+  const numGroups = Math.ceil(students.length / groupSize);
+  const groups = Array.from({ length: numGroups }, () => []);
+
+  let direction = 1;
+  let groupIndex = 0;
+
+  students.forEach((student) => {
+    groups[groupIndex].push(student);
+
+    if (direction === 1) {
+      groupIndex++;
+      if (groupIndex >= numGroups) {
+        groupIndex = numGroups - 1;
+        direction = -1;
+      }
+    } else {
+      groupIndex--;
+      if (groupIndex < 0) {
+        groupIndex = 0;
+        direction = 1;
+      }
+    }
+  });
+
+  return groups;
 }
 
 function createHomogeneousGroups(students, groupSize) {
-    const groups = [];
-    
-    for (let i = 0; i < students.length; i += groupSize) {
-        groups.push(students.slice(i, i + groupSize));
-    }
-    
-    return groups;
+  const groups = [];
+  for (let i = 0; i < students.length; i += groupSize) {
+    groups.push(students.slice(i, i + groupSize));
+  }
+  return groups;
 }
 
 function createBalancedGroups(students, groupSize) {
-    const numGroups = Math.ceil(students.length / groupSize);
-    const groups = Array.from({ length: numGroups }, () => []);
-    
-    // Categorize students by role
-    const roleGroups = {
-        '領導者': [],
-        '協調者': [],
-        '執行者': [],
-        '創意者': []
-    };
-    
-    students.forEach(student => {
-        if (roleGroups[student.roleTendency]) {
-            roleGroups[student.roleTendency].push(student);
-        } else {
-            roleGroups['執行者'].push(student);
-        }
+  const numGroups = Math.ceil(students.length / groupSize);
+  const groups = Array.from({ length: numGroups }, () => []);
+
+  const roleGroups = { 領導者: [], 協調者: [], 執行者: [], 創意者: [] };
+
+  students.forEach((student) => {
+    const role = student.roleTendency || "執行者";
+    if (roleGroups[role]) {
+      roleGroups[role].push(student);
+    } else {
+      roleGroups["執行者"].push(student);
+    }
+  });
+
+  Object.values(roleGroups).forEach((roleStudents) => {
+    roleStudents.forEach((student, index) => {
+      groups[index % numGroups].push(student);
     });
-    
-    // Distribute each role type across groups
-    Object.values(roleGroups).forEach(roleStudents => {
-        roleStudents.forEach((student, index) => {
-            const targetGroup = index % numGroups;
-            groups[targetGroup].push(student);
-        });
-    });
-    
-    return groups;
+  });
+
+  return groups;
 }
 
 function displayGroups(containerId, groups, className) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    
-    if (groups.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">目前沒有學生資料</p>';
-        return;
-    }
-    
-    const classDisplayName = className === 'A' ? 'MIS' : '管資';
-    
-    groups.forEach((group, index) => {
-        const card = document.createElement('div');
-        card.className = 'group-card';
-        
-        const membersHtml = group.map(student => `
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  if (groups.length === 0) {
+    container.innerHTML =
+      '<p style="text-align: center; color: #7f8c8d;">目前沒有學生資料</p>';
+    return;
+  }
+
+  const classDisplayName = className === "A" ? "MIS" : "管資";
+
+  groups.forEach((group, index) => {
+    const card = document.createElement("div");
+    card.className = "group-card";
+
+    const membersHtml = group
+      .map(
+        (student) => `
             <li>
                 <div class="member-info">
-                    <span>${student.studentName}</span>
-                    <span class="member-id">(${student.studentId})</span>
+                    <span>${student.studentName || "-"}</span>
+                    <span class="member-id">(${student.studentId || "-"})</span>
                 </div>
-                <span class="member-role">${student.roleTendency}</span>
+                <span class="member-role">${student.roleTendency || "-"}</span>
             </li>
-        `).join('');
-        
-        card.innerHTML = `
+        `,
+      )
+      .join("");
+
+    card.innerHTML = `
             <div class="group-header">
                 <span class="group-name">${classDisplayName} 第${index + 1}組</span>
                 <span class="group-size">${group.length}人</span>
             </div>
-            <ul class="group-members">
-                ${membersHtml}
-            </ul>
+            <ul class="group-members">${membersHtml}</ul>
         `;
-        
-        container.appendChild(card);
-    });
+
+    container.appendChild(card);
+  });
 }
 
 // ==========================================
 // Export Functions
 // ==========================================
 function downloadReport() {
-    const students = loadData();
-    const groupsA = JSON.parse(localStorage.getItem('groupingResultsA') || '[]');
-    const groupsB = JSON.parse(localStorage.getItem('groupingResultsB') || '[]');
-    
-    if (groupsA.length === 0 && groupsB.length === 0) {
-        alert('請先執行智慧分組！');
-        return;
-    }
-    
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('zh-TW');
-    const timeStr = now.toLocaleTimeString('zh-TW');
-    
-    let report = `
+  const groupsA = JSON.parse(localStorage.getItem("groupingResultsA") || "[]");
+  const groupsB = JSON.parse(localStorage.getItem("groupingResultsB") || "[]");
+
+  if (groupsA.length === 0 && groupsB.length === 0) {
+    alert("請先執行智慧分組！");
+    return;
+  }
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("zh-TW");
+  const timeStr = now.toLocaleTimeString("zh-TW");
+
+  let report = `
 ================================================================================
                         團隊學習分組報告
                    Team Learning Grouping Report
 ================================================================================
 
 產生時間：${dateStr} ${timeStr}
-總學生數：${students.length} 人
-MIS 全英班 (DMSI20090、MSF_10180)：${students.filter(s => s.classSection === 'A').length} 人
-管理資訊系統 中文班 (IM__10600)：${students.filter(s => s.classSection === 'B').length} 人
-分組策略：${document.getElementById('groupStrategy').selectedOptions[0].text}
-每組人數：${document.getElementById('groupSize').value} 人
+總學生數：${cachedStudents.length} 人
+MIS 全英班 (DMSI20090、MSF_10180)：${cachedStudents.filter((s) => s.classSection === "A").length} 人
+管理資訊系統 中文班 (IM__10600)：${cachedStudents.filter((s) => s.classSection === "B").length} 人
+分組策略：${document.getElementById("groupStrategy").selectedOptions[0].text}
+每組人數：${document.getElementById("groupSize").value} 人
 
 ================================================================================
                     MIS 全英班分組結果 (9:00-12:00)
                     DMSI20090、MSF_10180
 ================================================================================
 `;
-    
-    groupsA.forEach((group, index) => {
-        report += `\n【第${index + 1}組】(${group.length}人)\n`;
-        report += '-'.repeat(50) + '\n';
-        group.forEach(student => {
-            report += `  ${student.studentId}\t${student.studentName}\t${student.roleTendency}\n`;
-        });
+
+  groupsA.forEach((group, index) => {
+    report += `\n【第${index + 1}組】(${group.length}人)\n`;
+    report += "-".repeat(50) + "\n";
+    group.forEach((student) => {
+      report += `  ${student.studentId}\t${student.studentName}\t${student.roleTendency}\n`;
     });
-    
-    report += `
+  });
+
+  report += `
 ================================================================================
                  管理資訊系統 中文班分組結果 (2:00-5:00)
                           IM__10600
 ================================================================================
 `;
-    
-    groupsB.forEach((group, index) => {
-        report += `\n【第${index + 1}組】(${group.length}人)\n`;
-        report += '-'.repeat(50) + '\n';
-        group.forEach(student => {
-            report += `  ${student.studentId}\t${student.studentName}\t${student.roleTendency}\n`;
-        });
+
+  groupsB.forEach((group, index) => {
+    report += `\n【第${index + 1}組】(${group.length}人)\n`;
+    report += "-".repeat(50) + "\n";
+    group.forEach((student) => {
+      report += `  ${student.studentId}\t${student.studentName}\t${student.roleTendency}\n`;
     });
-    
-    report += `
+  });
+
+  report += `
 ================================================================================
                             學生詳細資料
 ================================================================================
 
 學號\t\t姓名\t\t班級\t動機\t效能\t團隊\t認知風格\t\t角色
 `;
-    
-    students.forEach(s => {
-        report += `${s.studentId}\t${s.studentName}\t${s.classSection}\t${s.motivationScore}\t${s.efficacyScore}\t${s.teamScore}\t${formatCognitiveStyle(s.cognitiveStyle)}\t\t${s.roleTendency}\n`;
-    });
-    
-    report += `
+
+  cachedStudents.forEach((s) => {
+    const classDisplay = s.classSection === "A" ? "MIS" : "管資";
+    report += `${s.studentId}\t${s.studentName}\t${classDisplay}\t${s.motivationScore}\t${s.efficacyScore}\t${s.teamScore}\t${formatCognitiveStyle(s.cognitiveStyle)}\t\t${s.roleTendency}\n`;
+  });
+
+  report += `
 ================================================================================
                              報告結束
 ================================================================================
 `;
-    
-    // Download file
-    const blob = new Blob([report], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `分組報告_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+  const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `分組報告_${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, "0")}${now.getDate().toString().padStart(2, "0")}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function downloadCSV() {
-    const students = loadData();
-    
-    if (students.length === 0) {
-        alert('目前沒有學生資料！');
-        return;
-    }
-    
-    // Create CSV header
-    let csv = '\uFEFF'; // BOM for Excel UTF-8
-    csv += '學號,姓名,班級,電子郵件,動機分數,效能分數,團隊分數,技能分數,認知風格,角色傾向,提交時間\n';
-    
-    // Add data rows
-    students.forEach(s => {
-        csv += `${s.studentId},${s.studentName},${s.classSection},${s.email},${s.motivationScore},${s.efficacyScore},${s.teamScore},${s.skillScore},${formatCognitiveStyle(s.cognitiveStyle)},${s.roleTendency},${s.submittedAt}\n`;
-    });
-    
-    // Download file
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `學生資料_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
+  if (cachedStudents.length === 0) {
+    alert("目前沒有學生資料！");
+    return;
+  }
 
-function clearData() {
-    if (confirm('確定要清除所有學生資料嗎？此操作無法復原！')) {
-        if (confirm('再次確認：這將刪除所有問卷資料和分組結果！')) {
-            localStorage.removeItem(STORAGE_KEY);
-            localStorage.removeItem('groupingResultsA');
-            localStorage.removeItem('groupingResultsB');
-            refreshAdminData();
-            document.getElementById('groupingResults').classList.add('hidden');
-            alert('所有資料已清除！');
-        }
-    }
+  let csv = "\uFEFF";
+  csv +=
+    "學號,姓名,班級,電子郵件,動機分數,效能分數,團隊分數,技能分數,認知風格,角色傾向,提交時間\n";
+
+  cachedStudents.forEach((s) => {
+    const classDisplay = s.classSection === "A" ? "MIS全英班" : "管資中文班";
+    csv += `${s.studentId},${s.studentName},${classDisplay},${s.email || ""},${s.motivationScore},${s.efficacyScore},${s.teamScore},${s.skillScore || ""},${formatCognitiveStyle(s.cognitiveStyle)},${s.roleTendency},${s.submittedAt}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `學生資料_${new Date().toISOString().split("T")[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ==========================================
 // Event Listeners
 // ==========================================
-document.getElementById('generateGroups').addEventListener('click', generateGroups);
-document.getElementById('downloadReport').addEventListener('click', downloadReport);
-document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
-document.getElementById('clearData').addEventListener('click', clearData);
+document
+  .getElementById("generateGroups")
+  .addEventListener("click", generateGroups);
+document
+  .getElementById("downloadReport")
+  .addEventListener("click", downloadReport);
+document.getElementById("downloadCSV").addEventListener("click", downloadCSV);
+document
+  .getElementById("refreshData")
+  .addEventListener("click", loadStudentData);
 
-// Initial load
-document.addEventListener('DOMContentLoaded', () => {
-    // Check admin login status on page load
-    updateAdminUI();
+// ==========================================
+// Initial Load
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+  checkAdminAccess();
 });

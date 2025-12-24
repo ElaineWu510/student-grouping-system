@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>團隊學習分組系統 | Team Learning Grouping System</title>
+    <title>團隊學習分組問卷 | Team Learning Grouping Survey</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -15,12 +15,13 @@
         <header class="header">
             <div class="header-content">
                 <h1 class="title">
-                    <span class="title-zh">團隊學習分組系統</span>
-                    <span class="title-en">Team Learning Grouping System</span>
+                    <span class="title-zh">團隊學習分組問卷</span>
+                    <span class="title-en">Team Learning Grouping Survey</span>
                 </h1>
                 <p class="subtitle">國立東華大學 資訊管理學系</p>
             </div>
-            <nav class="nav-tabs">
+            <!-- Hidden admin access - only shown when ?admin=true in URL -->
+            <nav id="navTabs" class="nav-tabs hidden">
                 <button class="tab-btn active" data-tab="questionnaire">
                     <span class="tab-icon">📝</span>
                     <span>學生問卷</span>
@@ -333,12 +334,18 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
                             <span>提交問卷</span>
                             <span class="btn-icon">→</span>
                         </button>
                     </div>
                 </form>
+
+                <!-- Loading Overlay -->
+                <div id="loadingOverlay" class="loading-overlay hidden">
+                    <div class="loading-spinner"></div>
+                    <p>正在提交資料...</p>
+                </div>
             </div>
 
             <!-- Success Message -->
@@ -346,6 +353,15 @@
                 <div class="success-icon">✓</div>
                 <h2>問卷提交成功！</h2>
                 <p>感謝您的參與，分組結果將於課堂上公布。</p>
+                <button class="btn btn-secondary" onclick="location.reload()">填寫新問卷</button>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message-box hidden">
+                <div class="error-icon">✕</div>
+                <h2>提交失敗</h2>
+                <p id="errorText">請稍後再試或聯繫老師。</p>
+                <button class="btn btn-secondary" onclick="hideError()">返回修改</button>
             </div>
         </section>
 
@@ -373,119 +389,121 @@
             <!-- Admin Content (Hidden until login) -->
             <div id="adminContent" class="admin-content hidden">
                 <div class="admin-toolbar">
+                    <button id="refreshData" class="btn btn-secondary">
+                        <span>🔄</span> 重新載入資料
+                    </button>
                     <button id="logoutBtn" class="btn btn-logout">
                         <span>🚪</span> 登出
                     </button>
                 </div>
                 
-            <div class="admin-header">
-                <h2>管理後台</h2>
-                <p>查看學生問卷資料並進行智慧分組</p>
-            </div>
+                <div class="admin-header">
+                    <h2>管理後台</h2>
+                    <p>查看學生問卷資料並進行智慧分組</p>
+                </div>
 
-            <div class="admin-stats">
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-content">
-                        <span class="stat-number" id="totalStudents">0</span>
-                        <span class="stat-label">總學生數</span>
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="totalStudents">0</span>
+                            <span class="stat-label">總學生數</span>
+                        </div>
                     </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">🌐</div>
-                    <div class="stat-content">
-                        <span class="stat-number" id="classACount">0</span>
-                        <span class="stat-label">MIS 全英班</span>
+                    <div class="stat-card">
+                        <div class="stat-icon">🌐</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="classACount">0</span>
+                            <span class="stat-label">MIS 全英班</span>
+                        </div>
                     </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📚</div>
-                    <div class="stat-content">
-                        <span class="stat-number" id="classBCount">0</span>
-                        <span class="stat-label">管理資訊系統 中文班</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="admin-actions">
-                <div class="action-group">
-                    <h3>分組設定</h3>
-                    <div class="settings-row">
-                        <label>
-                            每組人數：
-                            <select id="groupSize">
-                                <option value="3">3人</option>
-                                <option value="4">4人</option>
-                                <option value="5" selected>5人</option>
-                            </select>
-                        </label>
-                        <label>
-                            分組策略：
-                            <select id="groupStrategy">
-                                <option value="heterogeneous">異質分組 (推薦)</option>
-                                <option value="homogeneous">同質分組</option>
-                                <option value="balanced">均衡分組</option>
-                            </select>
-                        </label>
+                    <div class="stat-card">
+                        <div class="stat-icon">📚</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="classBCount">0</span>
+                            <span class="stat-label">管理資訊系統 中文班</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="button-group">
-                    <button id="generateGroups" class="btn btn-primary">
-                        <span>🎲</span> 執行智慧分組
-                    </button>
-                    <button id="downloadReport" class="btn btn-secondary">
-                        <span>📥</span> 下載分組報告
-                    </button>
-                    <button id="downloadCSV" class="btn btn-secondary">
-                        <span>📊</span> 匯出原始資料
-                    </button>
-                    <button id="clearData" class="btn btn-danger">
-                        <span>🗑️</span> 清除所有資料
-                    </button>
-                </div>
-            </div>
-
-            <!-- Student Data Table -->
-            <div class="data-section">
-                <h3>學生問卷資料</h3>
-                <div class="table-container">
-                    <table id="studentTable">
-                        <thead>
-                            <tr>
-                                <th>學號</th>
-                                <th>姓名</th>
-                                <th>班級</th>
-                                <th>動機分數</th>
-                                <th>效能分數</th>
-                                <th>團隊分數</th>
-                                <th>認知風格</th>
-                                <th>角色傾向</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentTableBody">
-                            <!-- Data will be populated here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Grouping Results -->
-            <div id="groupingResults" class="grouping-results hidden">
-                <h3>分組結果</h3>
-                <div class="class-groups">
-                    <div class="class-section">
-                        <h4>MIS 全英班 (9:00-12:00)</h4>
-                        <div id="classAGroups" class="groups-container"></div>
+                <div class="admin-actions">
+                    <div class="action-group">
+                        <h3>分組設定</h3>
+                        <div class="settings-row">
+                            <label>
+                                每組人數：
+                                <select id="groupSize">
+                                    <option value="3">3人</option>
+                                    <option value="4">4人</option>
+                                    <option value="5" selected>5人</option>
+                                </select>
+                            </label>
+                            <label>
+                                分組策略：
+                                <select id="groupStrategy">
+                                    <option value="heterogeneous">異質分組 (推薦)</option>
+                                    <option value="homogeneous">同質分組</option>
+                                    <option value="balanced">均衡分組</option>
+                                </select>
+                            </label>
+                        </div>
                     </div>
-                    <div class="class-section">
-                        <h4>管理資訊系統 中文班 (2:00-5:00)</h4>
-                        <div id="classBGroups" class="groups-container"></div>
+
+                    <div class="button-group">
+                        <button id="generateGroups" class="btn btn-primary">
+                            <span>🎲</span> 執行智慧分組
+                        </button>
+                        <button id="downloadReport" class="btn btn-secondary">
+                            <span>📥</span> 下載分組報告
+                        </button>
+                        <button id="downloadCSV" class="btn btn-secondary">
+                            <span>📊</span> 匯出原始資料
+                        </button>
                     </div>
                 </div>
+
+                <!-- Student Data Table -->
+                <div class="data-section">
+                    <h3>學生問卷資料</h3>
+                    <div class="table-container">
+                        <table id="studentTable">
+                            <thead>
+                                <tr>
+                                    <th>學號</th>
+                                    <th>姓名</th>
+                                    <th>班級</th>
+                                    <th>動機分數</th>
+                                    <th>效能分數</th>
+                                    <th>團隊分數</th>
+                                    <th>認知風格</th>
+                                    <th>角色傾向</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Grouping Results -->
+                <div id="groupingResults" class="grouping-results hidden">
+                    <h3>分組結果</h3>
+                    <div class="class-groups">
+                        <div class="class-section">
+                            <h4>MIS 全英班 (9:00-12:00)</h4>
+                            <div id="classAGroups" class="groups-container"></div>
+                        </div>
+                        <div class="class-section">
+                            <h4>管理資訊系統 中文班 (2:00-5:00)</h4>
+                            <div id="classBGroups" class="groups-container"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            </div> <!-- End of adminContent -->
         </section>
+
+        <!-- Footer -->
         <footer class="footer">
             <p>© 2025 國立東華大學 資訊管理學系 | 教學實踐研究計畫</p>
         </footer>
