@@ -4,7 +4,7 @@
 // ==========================================
 
 // ============ 設定 ============
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQo8R97hPEz5xCdwtlJspL_azr53vaFpunTui8wYOCn9CcMPMMfiyHK5uPCC0o-CEfCw/exec';
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
 const ADMIN_SESSION_KEY = 'adminLoggedIn';
 
 let cachedStudents = [];
@@ -121,16 +121,14 @@ function collectFormData(formData) {
     const engAvg = ((engReading + engListening + engSpeaking + engWriting) / 4).toFixed(2);
     
     // 中文能力
-    const chnReading = formData.get('chnReading');
-    const chnListening = formData.get('chnListening');
-    const chnSpeaking = formData.get('chnSpeaking');
-    const chnWriting = formData.get('chnWriting');
-    let chnAvg = 'N/A';
-    if (chnReading !== 'na' && chnListening !== 'na') {
-        const chnScores = [chnReading, chnListening, chnSpeaking, chnWriting].filter(v => v !== 'na').map(v => parseInt(v));
-        if (chnScores.length > 0) {
-            chnAvg = (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2);
-        }
+    const chnReading = parseInt(formData.get('chnReading')) || 0;
+    const chnListening = parseInt(formData.get('chnListening')) || 0;
+    const chnSpeaking = parseInt(formData.get('chnSpeaking')) || 0;
+    const chnWriting = parseInt(formData.get('chnWriting')) || 0;
+    let chnAvg = 0;
+    const chnScores = [chnReading, chnListening, chnSpeaking, chnWriting].filter(v => v > 0);
+    if (chnScores.length > 0) {
+        chnAvg = (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2);
     }
     
     // 修過的課程
@@ -201,7 +199,7 @@ function collectFormData(formData) {
         // 語言能力
         engAvg: parseFloat(engAvg),
         engReading, engListening, engSpeaking, engWriting,
-        chnAvg: chnAvg === 'N/A' ? chnAvg : parseFloat(chnAvg),
+        chnAvg: parseFloat(chnAvg) || 0,
         
         // 先備知識
         courseCount,
