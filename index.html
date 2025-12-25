@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>團隊學習分組問卷 | Team Learning Grouping Survey</title>
+    <title>Team-Based Learning 分組資料調查表</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -15,12 +15,12 @@
         <header class="header">
             <div class="header-content">
                 <h1 class="title">
-                    <span class="title-zh">團隊學習分組問卷</span>
-                    <span class="title-en">Team Learning Grouping Survey</span>
+                    <span class="title-zh">Team-Based Learning 分組資料調查表</span>
+                    <span class="title-en">Team-Based Learning Grouping Survey</span>
                 </h1>
                 <p class="subtitle">國立東華大學 資訊管理學系</p>
             </div>
-            <!-- Hidden admin access - only shown when ?admin=true in URL -->
+            <!-- Hidden admin access -->
             <nav id="navTabs" class="nav-tabs hidden">
                 <button class="tab-btn active" data-tab="questionnaire">
                     <span class="tab-icon">📝</span>
@@ -37,305 +37,787 @@
         <section id="questionnaire" class="section active">
             <div class="card questionnaire-card">
                 <div class="card-header">
-                    <h2>學習風格與團隊偏好問卷</h2>
-                    <p class="card-subtitle">請誠實填寫以下問題，以便進行最佳分組配對</p>
+                    <h2>分組資料調查表</h2>
+                    <p class="card-subtitle">
+                        為了讓課程分組更加公平且有效，請您協助填寫以下資料。<br>
+                        這些資訊將僅用於分組參考，不會影響您的成績。
+                    </p>
                 </div>
 
                 <form id="studentForm" class="form">
-                    <!-- Basic Info -->
+                    <!-- Part 1: Basic Information -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">01</span>
                             基本資料 Basic Information
                         </h3>
                         
-                        <div class="form-group">
-                            <label for="studentId">學號 Student ID <span class="required">*</span></label>
-                            <input type="text" id="studentId" name="studentId" required placeholder="例如：410812345">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="studentId">學號 Student ID <span class="required">*</span></label>
+                                <input type="text" id="studentId" name="studentId" required placeholder="例如：410812345">
+                            </div>
+                            <div class="form-group">
+                                <label for="studentName">姓名 Name <span class="required">*</span></label>
+                                <input type="text" id="studentName" name="studentName" required placeholder="請輸入您的姓名">
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="studentName">姓名 Name <span class="required">*</span></label>
-                            <input type="text" id="studentName" name="studentName" required placeholder="請輸入您的姓名">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>性別 Gender <span class="required">*</span></label>
+                                <div class="radio-group horizontal">
+                                    <label class="radio-option">
+                                        <input type="radio" name="gender" value="male" required>
+                                        <span>男 Male</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="gender" value="female">
+                                        <span>女 Female</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="gender" value="other">
+                                        <span>其他 Other</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="gender" value="prefer_not_say">
+                                        <span>不願透露</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="classSection">班級 Class <span class="required">*</span></label>
-                            <select id="classSection" name="classSection" required>
-                                <option value="">請選擇班級 / Select your class</option>
-                                <option value="A">MIS (9:00-12:00) 全英授課 30人 | DMSI20090、MSF_10180</option>
-                                <option value="B">管理資訊系統 (2:00-5:00) 中文授課 70人 | IM__10600</option>
-                            </select>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>國籍 Nationality <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="nationality" value="taiwan" required>
+                                        <span>台灣 Taiwan</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="nationality" value="china">
+                                        <span>中國大陸 Mainland China</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="nationality" value="hongkong">
+                                        <span>香港 Hong Kong</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="nationality" value="macau">
+                                        <span>澳門 Macau</span>
+                                    </label>
+                                    <label class="radio-option other-option">
+                                        <input type="radio" name="nationality" value="other">
+                                        <span>其他 Other:</span>
+                                        <input type="text" name="nationalityOther" class="inline-input" placeholder="請說明">
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="email">電子郵件 Email</label>
-                            <input type="email" id="email" name="email" placeholder="選填，用於接收分組通知">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>母語 Native Language <span class="required">*</span></label>
+                                <div class="radio-group horizontal">
+                                    <label class="radio-option">
+                                        <input type="radio" name="nativeLanguage" value="chinese" required>
+                                        <span>中文 Chinese</span>
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="nativeLanguage" value="english">
+                                        <span>英文 English</span>
+                                    </label>
+                                    <label class="radio-option other-option">
+                                        <input type="radio" name="nativeLanguage" value="other">
+                                        <span>其他:</span>
+                                        <input type="text" name="nativeLanguageOther" class="inline-input" placeholder="請說明">
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Learning Motivation -->
+                    <!-- Part 1.5: Language Proficiency -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">02</span>
-                            學習動機 Learning Motivation
+                            語言能力自評 Language Proficiency
                         </h3>
-                        <p class="section-desc">請根據您的實際情況選擇最符合的選項 (1=非常不同意, 5=非常同意)</p>
-
-                        <div class="likert-group">
-                            <div class="likert-item">
-                                <p class="likert-question">我喜歡具有挑戰性的課程內容，這樣我才能學習更多。</p>
-                                <p class="likert-question-en">I prefer course material that really challenges me so I can learn.</p>
-                                <div class="likert-scale">
-                                    <label><input type="radio" name="motivation1" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="motivation1" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="motivation1" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="motivation1" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="motivation1" value="5"><span>5</span></label>
+                        
+                        <div class="subsection">
+                            <h4>英語能力 English Proficiency <span class="required">*</span></h4>
+                            <p class="section-desc">請評估您的英語能力（1=非常不好，5=非常好）</p>
+                            <div class="rating-table">
+                                <div class="rating-row header">
+                                    <div class="rating-label">項目 Item</div>
+                                    <div class="rating-options">
+                                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">閱讀能力 Reading</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="engReading" value="1" required></label>
+                                        <label><input type="radio" name="engReading" value="2"></label>
+                                        <label><input type="radio" name="engReading" value="3"></label>
+                                        <label><input type="radio" name="engReading" value="4"></label>
+                                        <label><input type="radio" name="engReading" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">聽力能力 Listening</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="engListening" value="1" required></label>
+                                        <label><input type="radio" name="engListening" value="2"></label>
+                                        <label><input type="radio" name="engListening" value="3"></label>
+                                        <label><input type="radio" name="engListening" value="4"></label>
+                                        <label><input type="radio" name="engListening" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">口說能力 Speaking</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="engSpeaking" value="1" required></label>
+                                        <label><input type="radio" name="engSpeaking" value="2"></label>
+                                        <label><input type="radio" name="engSpeaking" value="3"></label>
+                                        <label><input type="radio" name="engSpeaking" value="4"></label>
+                                        <label><input type="radio" name="engSpeaking" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">寫作能力 Writing</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="engWriting" value="1" required></label>
+                                        <label><input type="radio" name="engWriting" value="2"></label>
+                                        <label><input type="radio" name="engWriting" value="3"></label>
+                                        <label><input type="radio" name="engWriting" value="4"></label>
+                                        <label><input type="radio" name="engWriting" value="5"></label>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="likert-item">
-                                <p class="likert-question">我喜歡能引起我好奇心的課程內容，即使它很難學習。</p>
-                                <p class="likert-question-en">I prefer course material that arouses my curiosity, even if it is difficult.</p>
-                                <div class="likert-scale">
-                                    <label><input type="radio" name="motivation2" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="motivation2" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="motivation2" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="motivation2" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="motivation2" value="5"><span>5</span></label>
+                        <div class="subsection" id="chineseProficiency">
+                            <h4>中文能力自評 Chinese Proficiency（針對非中文母語者）</h4>
+                            <p class="section-desc">請評估您的中文能力（1=非常不好，5=非常好，N/A=不適用）</p>
+                            <div class="rating-table">
+                                <div class="rating-row header">
+                                    <div class="rating-label">項目 Item</div>
+                                    <div class="rating-options with-na">
+                                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>N/A</span>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="likert-item">
-                                <p class="likert-question">在這門課程中獲得好成績對我來說是最重要的事情。</p>
-                                <p class="likert-question-en">Getting a good grade in this class is the most satisfying thing to me.</p>
-                                <div class="likert-scale">
-                                    <label><input type="radio" name="motivation3" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="motivation3" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="motivation3" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="motivation3" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="motivation3" value="5"><span>5</span></label>
+                                <div class="rating-row">
+                                    <div class="rating-label">閱讀能力 Reading</div>
+                                    <div class="rating-options with-na">
+                                        <label><input type="radio" name="chnReading" value="1"></label>
+                                        <label><input type="radio" name="chnReading" value="2"></label>
+                                        <label><input type="radio" name="chnReading" value="3"></label>
+                                        <label><input type="radio" name="chnReading" value="4"></label>
+                                        <label><input type="radio" name="chnReading" value="5"></label>
+                                        <label><input type="radio" name="chnReading" value="na" checked></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">聽力能力 Listening</div>
+                                    <div class="rating-options with-na">
+                                        <label><input type="radio" name="chnListening" value="1"></label>
+                                        <label><input type="radio" name="chnListening" value="2"></label>
+                                        <label><input type="radio" name="chnListening" value="3"></label>
+                                        <label><input type="radio" name="chnListening" value="4"></label>
+                                        <label><input type="radio" name="chnListening" value="5"></label>
+                                        <label><input type="radio" name="chnListening" value="na" checked></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">口說能力 Speaking</div>
+                                    <div class="rating-options with-na">
+                                        <label><input type="radio" name="chnSpeaking" value="1"></label>
+                                        <label><input type="radio" name="chnSpeaking" value="2"></label>
+                                        <label><input type="radio" name="chnSpeaking" value="3"></label>
+                                        <label><input type="radio" name="chnSpeaking" value="4"></label>
+                                        <label><input type="radio" name="chnSpeaking" value="5"></label>
+                                        <label><input type="radio" name="chnSpeaking" value="na" checked></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">寫作能力 Writing</div>
+                                    <div class="rating-options with-na">
+                                        <label><input type="radio" name="chnWriting" value="1"></label>
+                                        <label><input type="radio" name="chnWriting" value="2"></label>
+                                        <label><input type="radio" name="chnWriting" value="3"></label>
+                                        <label><input type="radio" name="chnWriting" value="4"></label>
+                                        <label><input type="radio" name="chnWriting" value="5"></label>
+                                        <label><input type="radio" name="chnWriting" value="na" checked></label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Self-Efficacy -->
+                    <!-- Part 2: Prior Knowledge -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">03</span>
-                            自我效能 Self-Efficacy
+                            先備知識評估 Prior Knowledge Assessment
                         </h3>
-                        <p class="section-desc">請評估您對自己能力的信心程度</p>
 
-                        <div class="likert-group">
-                            <div class="likert-item">
-                                <p class="likert-question">只要我夠努力，我總是能設法解決困難的問題。</p>
-                                <p class="likert-question-en">I can always manage to solve difficult problems if I try hard enough.</p>
-                                <div class="likert-scale">
-                                    <label><input type="radio" name="efficacy1" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="efficacy1" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="efficacy1" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="efficacy1" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="efficacy1" value="5"><span>5</span></label>
+                        <div class="subsection">
+                            <h4>相關課程修習經驗 Related Course Experience</h4>
+                            <p class="section-desc">請勾選您曾修習過的相關課程（可複選）</p>
+                            <div class="checkbox-group">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="courses" value="intro_cs">
+                                    <span>計算機概論 Introduction to Computer Science</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="courses" value="intro_im">
+                                    <span>資訊管理導論 Introduction to Information Management</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="courses" value="database">
+                                    <span>資料庫管理 Database Management</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="courses" value="sa">
+                                    <span>系統分析與設計 System Analysis and Design</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="courses" value="ecommerce">
+                                    <span>電子商務 E-commerce</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="courses" value="erp">
+                                    <span>企業資源規劃 Enterprise Resource Planning (ERP)</span>
+                                </label>
+                                <label class="checkbox-option other-option">
+                                    <input type="checkbox" name="courses" value="other">
+                                    <span>其他 Other:</span>
+                                    <input type="text" name="coursesOther" class="inline-input" placeholder="請說明">
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="courses" value="none" id="coursesNone">
+                                    <span>以上皆無 None of the above</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="subsection">
+                            <h4>資訊科技使用經驗 IT Experience <span class="required">*</span></h4>
+                            <p class="section-desc">請評估您對以下資訊科技工具的熟悉程度（1=完全不熟悉，5=非常熟悉）</p>
+                            <div class="rating-table">
+                                <div class="rating-row header">
+                                    <div class="rating-label">工具 Tool</div>
+                                    <div class="rating-options">
+                                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">Microsoft Office (Word, Excel, PowerPoint)</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="itOffice" value="1" required></label>
+                                        <label><input type="radio" name="itOffice" value="2"></label>
+                                        <label><input type="radio" name="itOffice" value="3"></label>
+                                        <label><input type="radio" name="itOffice" value="4"></label>
+                                        <label><input type="radio" name="itOffice" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">Google Workspace (Docs, Sheets, Slides)</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="itGoogle" value="1" required></label>
+                                        <label><input type="radio" name="itGoogle" value="2"></label>
+                                        <label><input type="radio" name="itGoogle" value="3"></label>
+                                        <label><input type="radio" name="itGoogle" value="4"></label>
+                                        <label><input type="radio" name="itGoogle" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">資料庫軟體 Database (Access, MySQL)</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="itDatabase" value="1" required></label>
+                                        <label><input type="radio" name="itDatabase" value="2"></label>
+                                        <label><input type="radio" name="itDatabase" value="3"></label>
+                                        <label><input type="radio" name="itDatabase" value="4"></label>
+                                        <label><input type="radio" name="itDatabase" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">專案管理工具 Project Management (Trello, Asana)</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="itProject" value="1" required></label>
+                                        <label><input type="radio" name="itProject" value="2"></label>
+                                        <label><input type="radio" name="itProject" value="3"></label>
+                                        <label><input type="radio" name="itProject" value="4"></label>
+                                        <label><input type="radio" name="itProject" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">線上協作工具 Collaboration (Miro, Padlet)</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="itCollab" value="1" required></label>
+                                        <label><input type="radio" name="itCollab" value="2"></label>
+                                        <label><input type="radio" name="itCollab" value="3"></label>
+                                        <label><input type="radio" name="itCollab" value="4"></label>
+                                        <label><input type="radio" name="itCollab" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">AI 工具 AI tools (ChatGPT, NotebookLM)</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="itAI" value="1" required></label>
+                                        <label><input type="radio" name="itAI" value="2"></label>
+                                        <label><input type="radio" name="itAI" value="3"></label>
+                                        <label><input type="radio" name="itAI" value="4"></label>
+                                        <label><input type="radio" name="itAI" value="5"></label>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="likert-item">
-                                <p class="likert-question">對我來說，堅持目標並完成它是容易的。</p>
-                                <p class="likert-question-en">It is easy for me to stick to my aims and accomplish my goals.</p>
-                                <div class="likert-scale">
-                                    <label><input type="radio" name="efficacy2" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="efficacy2" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="efficacy2" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="efficacy2" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="efficacy2" value="5"><span>5</span></label>
+                        <div class="subsection">
+                            <h4>管理知識背景 Management Knowledge <span class="required">*</span></h4>
+                            <p class="section-desc">請評估您對以下管理概念的理解程度（1=完全不了解，5=非常了解）</p>
+                            <div class="rating-table">
+                                <div class="rating-row header">
+                                    <div class="rating-label">概念 Concept</div>
+                                    <div class="rating-options">
+                                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div class="likert-item">
-                                <p class="likert-question">當我遇到問題時，我通常能找到幾個解決方案。</p>
-                                <p class="likert-question-en">When I am confronted with a problem, I can usually find several solutions.</p>
-                                <div class="likert-scale">
-                                    <label><input type="radio" name="efficacy3" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="efficacy3" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="efficacy3" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="efficacy3" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="efficacy3" value="5"><span>5</span></label>
+                                <div class="rating-row">
+                                    <div class="rating-label">企業流程管理 Business Process Management</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="mgmtBPM" value="1" required></label>
+                                        <label><input type="radio" name="mgmtBPM" value="2"></label>
+                                        <label><input type="radio" name="mgmtBPM" value="3"></label>
+                                        <label><input type="radio" name="mgmtBPM" value="4"></label>
+                                        <label><input type="radio" name="mgmtBPM" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">供應鏈管理 Supply Chain Management</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="mgmtSCM" value="1" required></label>
+                                        <label><input type="radio" name="mgmtSCM" value="2"></label>
+                                        <label><input type="radio" name="mgmtSCM" value="3"></label>
+                                        <label><input type="radio" name="mgmtSCM" value="4"></label>
+                                        <label><input type="radio" name="mgmtSCM" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">顧客關係管理 Customer Relationship Management</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="mgmtCRM" value="1" required></label>
+                                        <label><input type="radio" name="mgmtCRM" value="2"></label>
+                                        <label><input type="radio" name="mgmtCRM" value="3"></label>
+                                        <label><input type="radio" name="mgmtCRM" value="4"></label>
+                                        <label><input type="radio" name="mgmtCRM" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">企業資源規劃 Enterprise Resource Planning</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="mgmtERP" value="1" required></label>
+                                        <label><input type="radio" name="mgmtERP" value="2"></label>
+                                        <label><input type="radio" name="mgmtERP" value="3"></label>
+                                        <label><input type="radio" name="mgmtERP" value="4"></label>
+                                        <label><input type="radio" name="mgmtERP" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">商業智慧 Business Intelligence</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="mgmtBI" value="1" required></label>
+                                        <label><input type="radio" name="mgmtBI" value="2"></label>
+                                        <label><input type="radio" name="mgmtBI" value="3"></label>
+                                        <label><input type="radio" name="mgmtBI" value="4"></label>
+                                        <label><input type="radio" name="mgmtBI" value="5"></label>
+                                    </div>
+                                </div>
+                                <div class="rating-row">
+                                    <div class="rating-label">數位轉型 Digital Transformation</div>
+                                    <div class="rating-options">
+                                        <label><input type="radio" name="mgmtDT" value="1" required></label>
+                                        <label><input type="radio" name="mgmtDT" value="2"></label>
+                                        <label><input type="radio" name="mgmtDT" value="3"></label>
+                                        <label><input type="radio" name="mgmtDT" value="4"></label>
+                                        <label><input type="radio" name="mgmtDT" value="5"></label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Cognitive Style -->
+                    <!-- Part 3: Learning Motivation (MSLQ) -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">04</span>
-                            認知風格 Cognitive Style
+                            學習動機量表 Learning Motivation Scale (MSLQ)
                         </h3>
-                        <p class="section-desc">請選擇最符合您學習習慣的選項</p>
+                        <p class="section-desc">
+                            請根據您對本課程的期待，選擇最符合您的選項<br>
+                            1=非常不同意, 2=不同意, 3=普通, 4=同意, 5=非常同意
+                        </p>
 
-                        <div class="cognitive-group">
-                            <div class="cognitive-item">
-                                <p class="cognitive-question">當學習新概念時，我傾向於：</p>
-                                <div class="cognitive-options">
-                                    <label class="cognitive-option">
-                                        <input type="radio" name="cognitive1" value="holist" required>
-                                        <span class="option-content">
-                                            <strong>整體主義 (Holist)</strong>
-                                            <small>先掌握全貌，再理解細節</small>
-                                        </span>
-                                    </label>
-                                    <label class="cognitive-option">
-                                        <input type="radio" name="cognitive1" value="serialist">
-                                        <span class="option-content">
-                                            <strong>循序主義 (Serialist)</strong>
-                                            <small>逐步學習，從細節到整體</small>
-                                        </span>
-                                    </label>
+                        <div class="subsection">
+                            <h4>內在動機 Intrinsic Motivation</h4>
+                            <div class="likert-group">
+                                <div class="likert-item">
+                                    <p class="likert-question">11. 在這樣的課堂中，我喜歡具有挑戰性的課程內容，這樣我才能學習。</p>
+                                    <p class="likert-question-en">In a class like this, I prefer course material that really challenges me so I can learn.</p>
+                                    <div class="likert-scale">
+                                        <label><input type="radio" name="mslq11" value="1" required><span>1</span></label>
+                                        <label><input type="radio" name="mslq11" value="2"><span>2</span></label>
+                                        <label><input type="radio" name="mslq11" value="3"><span>3</span></label>
+                                        <label><input type="radio" name="mslq11" value="4"><span>4</span></label>
+                                        <label><input type="radio" name="mslq11" value="5"><span>5</span></label>
+                                    </div>
+                                </div>
+                                <div class="likert-item">
+                                    <p class="likert-question">12. 在這樣的課堂中，我喜歡能引起我好奇心的課程內容，即使它很難學習。</p>
+                                    <p class="likert-question-en">In a class like this, I prefer course material that arouses my curiosity, even if it is difficult to learn.</p>
+                                    <div class="likert-scale">
+                                        <label><input type="radio" name="mslq12" value="1" required><span>1</span></label>
+                                        <label><input type="radio" name="mslq12" value="2"><span>2</span></label>
+                                        <label><input type="radio" name="mslq12" value="3"><span>3</span></label>
+                                        <label><input type="radio" name="mslq12" value="4"><span>4</span></label>
+                                        <label><input type="radio" name="mslq12" value="5"><span>5</span></label>
+                                    </div>
+                                </div>
+                                <div class="likert-item">
+                                    <p class="likert-question">13. 當我有機會時，我會選擇可以學到東西的課程作業，即使它們不能保證得到好成績。</p>
+                                    <p class="likert-question-en">When I have the opportunity, I choose course assignments that I can learn from even if they don't guarantee a good grade.</p>
+                                    <div class="likert-scale">
+                                        <label><input type="radio" name="mslq13" value="1" required><span>1</span></label>
+                                        <label><input type="radio" name="mslq13" value="2"><span>2</span></label>
+                                        <label><input type="radio" name="mslq13" value="3"><span>3</span></label>
+                                        <label><input type="radio" name="mslq13" value="4"><span>4</span></label>
+                                        <label><input type="radio" name="mslq13" value="5"><span>5</span></label>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="cognitive-item">
-                                <p class="cognitive-question">在解決問題時，我偏好：</p>
-                                <div class="cognitive-options">
-                                    <label class="cognitive-option">
-                                        <input type="radio" name="cognitive2" value="intuitive" required>
-                                        <span class="option-content">
-                                            <strong>直覺型</strong>
-                                            <small>依靠直覺和創意思考</small>
-                                        </span>
-                                    </label>
-                                    <label class="cognitive-option">
-                                        <input type="radio" name="cognitive2" value="analytical">
-                                        <span class="option-content">
-                                            <strong>分析型</strong>
-                                            <small>依靠邏輯和系統分析</small>
-                                        </span>
-                                    </label>
+                        <div class="subsection">
+                            <h4>外在動機 Extrinsic Motivation</h4>
+                            <div class="likert-group">
+                                <div class="likert-item">
+                                    <p class="likert-question">14. 在這門課程中獲得好成績對我來說是最令人滿意的事情。</p>
+                                    <p class="likert-question-en">Getting a good grade in this class is the most satisfying thing to me.</p>
+                                    <div class="likert-scale">
+                                        <label><input type="radio" name="mslq14" value="1" required><span>1</span></label>
+                                        <label><input type="radio" name="mslq14" value="2"><span>2</span></label>
+                                        <label><input type="radio" name="mslq14" value="3"><span>3</span></label>
+                                        <label><input type="radio" name="mslq14" value="4"><span>4</span></label>
+                                        <label><input type="radio" name="mslq14" value="5"><span>5</span></label>
+                                    </div>
+                                </div>
+                                <div class="likert-item">
+                                    <p class="likert-question">15. 現在對我最重要的是提高我的平均成績以成為更好的學生。</p>
+                                    <p class="likert-question-en">The most important thing for me right now is improving my grade point average to become a better student.</p>
+                                    <div class="likert-scale">
+                                        <label><input type="radio" name="mslq15" value="1" required><span>1</span></label>
+                                        <label><input type="radio" name="mslq15" value="2"><span>2</span></label>
+                                        <label><input type="radio" name="mslq15" value="3"><span>3</span></label>
+                                        <label><input type="radio" name="mslq15" value="4"><span>4</span></label>
+                                        <label><input type="radio" name="mslq15" value="5"><span>5</span></label>
+                                    </div>
+                                </div>
+                                <div class="likert-item">
+                                    <p class="likert-question">16. 我想在這門課程中表現好，因為向家人、朋友、雇主或其他人展示我的能力很重要。</p>
+                                    <p class="likert-question-en">I want to do well in this class because it is important to show my ability to my family, friends, employer, or others.</p>
+                                    <div class="likert-scale">
+                                        <label><input type="radio" name="mslq16" value="1" required><span>1</span></label>
+                                        <label><input type="radio" name="mslq16" value="2"><span>2</span></label>
+                                        <label><input type="radio" name="mslq16" value="3"><span>3</span></label>
+                                        <label><input type="radio" name="mslq16" value="4"><span>4</span></label>
+                                        <label><input type="radio" name="mslq16" value="5"><span>5</span></label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Team Collaboration Preference -->
+                    <!-- Part 4: Self-Efficacy -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">05</span>
-                            團隊合作偏好 Team Collaboration Preference
+                            自我效能量表 Self-Efficacy Scale
                         </h3>
-                        <p class="section-desc">請評估您在團隊中的角色傾向</p>
+                        <p class="section-desc">
+                            請根據您對自己能力的信心程度，選擇最符合的選項<br>
+                            1=非常不同意, 2=不同意, 3=沒意見, 4=同意, 5=非常同意
+                        </p>
 
-                        <div class="likert-group">
+                        <div class="likert-group compact">
                             <div class="likert-item">
-                                <p class="likert-question">我喜歡在團隊中擔任領導角色。</p>
-                                <p class="likert-question-en">I enjoy taking a leadership role in team projects.</p>
+                                <p class="likert-question">17. 只要我夠努力，我總是能設法解決困難的問題。</p>
+                                <p class="likert-question-en">I can always manage to solve difficult problems if I try hard enough.</p>
                                 <div class="likert-scale">
-                                    <label><input type="radio" name="team1" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="team1" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="team1" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="team1" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="team1" value="5"><span>5</span></label>
+                                    <label><input type="radio" name="se17" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se17" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se17" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se17" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se17" value="5"><span>5</span></label>
                                 </div>
                             </div>
-
                             <div class="likert-item">
-                                <p class="likert-question">我擅長協調團隊成員之間的溝通。</p>
-                                <p class="likert-question-en">I am good at coordinating communication between team members.</p>
+                                <p class="likert-question">18. 如果有人反對我，我能找到方法達成我想要的。</p>
+                                <p class="likert-question-en">If someone opposes me, I can find the means and ways to get what I want.</p>
                                 <div class="likert-scale">
-                                    <label><input type="radio" name="team2" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="team2" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="team2" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="team2" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="team2" value="5"><span>5</span></label>
+                                    <label><input type="radio" name="se18" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se18" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se18" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se18" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se18" value="5"><span>5</span></label>
                                 </div>
                             </div>
-
                             <div class="likert-item">
-                                <p class="likert-question">我更傾向專注於執行具體任務。</p>
-                                <p class="likert-question-en">I prefer focusing on executing specific tasks.</p>
+                                <p class="likert-question">19. 對我來說，堅持目標並完成它是容易的。</p>
+                                <p class="likert-question-en">It is easy for me to stick to my aims and accomplish my goals.</p>
                                 <div class="likert-scale">
-                                    <label><input type="radio" name="team3" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="team3" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="team3" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="team3" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="team3" value="5"><span>5</span></label>
+                                    <label><input type="radio" name="se19" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se19" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se19" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se19" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se19" value="5"><span>5</span></label>
                                 </div>
                             </div>
-
                             <div class="likert-item">
-                                <p class="likert-question">我喜歡提出創意想法和新的解決方案。</p>
-                                <p class="likert-question-en">I enjoy proposing creative ideas and new solutions.</p>
+                                <p class="likert-question">20. 我有信心能有效處理突發事件。</p>
+                                <p class="likert-question-en">I am confident that I could deal efficiently with unexpected events.</p>
                                 <div class="likert-scale">
-                                    <label><input type="radio" name="team4" value="1" required><span>1</span></label>
-                                    <label><input type="radio" name="team4" value="2"><span>2</span></label>
-                                    <label><input type="radio" name="team4" value="3"><span>3</span></label>
-                                    <label><input type="radio" name="team4" value="4"><span>4</span></label>
-                                    <label><input type="radio" name="team4" value="5"><span>5</span></label>
+                                    <label><input type="radio" name="se20" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se20" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se20" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se20" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se20" value="5"><span>5</span></label>
+                                </div>
+                            </div>
+                            <div class="likert-item">
+                                <p class="likert-question">21. 因為我的應變能力，我知道如何處理意料之外的情況。</p>
+                                <p class="likert-question-en">Thanks to my resourcefulness, I know how to handle unforeseen situations.</p>
+                                <div class="likert-scale">
+                                    <label><input type="radio" name="se21" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se21" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se21" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se21" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se21" value="5"><span>5</span></label>
+                                </div>
+                            </div>
+                            <div class="likert-item">
+                                <p class="likert-question">22. 只要投入必要的努力，我能解決大部分的問題。</p>
+                                <p class="likert-question-en">I can solve most problems if I invest the necessary effort.</p>
+                                <div class="likert-scale">
+                                    <label><input type="radio" name="se22" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se22" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se22" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se22" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se22" value="5"><span>5</span></label>
+                                </div>
+                            </div>
+                            <div class="likert-item">
+                                <p class="likert-question">23. 面對困難時我能保持冷靜，因為我可以依靠自己的應對能力。</p>
+                                <p class="likert-question-en">I can remain calm when facing difficulties because I can rely on my coping abilities.</p>
+                                <div class="likert-scale">
+                                    <label><input type="radio" name="se23" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se23" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se23" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se23" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se23" value="5"><span>5</span></label>
+                                </div>
+                            </div>
+                            <div class="likert-item">
+                                <p class="likert-question">24. 當我遇到問題時，我通常能找到幾個解決方案。</p>
+                                <p class="likert-question-en">When I am confronted with a problem, I can usually find several solutions.</p>
+                                <div class="likert-scale">
+                                    <label><input type="radio" name="se24" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se24" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se24" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se24" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se24" value="5"><span>5</span></label>
+                                </div>
+                            </div>
+                            <div class="likert-item">
+                                <p class="likert-question">25. 如果我遇到麻煩，我通常能想出解決方法。</p>
+                                <p class="likert-question-en">If I am in trouble, I can usually think of a solution.</p>
+                                <div class="likert-scale">
+                                    <label><input type="radio" name="se25" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se25" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se25" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se25" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se25" value="5"><span>5</span></label>
+                                </div>
+                            </div>
+                            <div class="likert-item">
+                                <p class="likert-question">26. 我通常能處理任何發生在我身上的事。</p>
+                                <p class="likert-question-en">I can usually handle whatever comes my way.</p>
+                                <div class="likert-scale">
+                                    <label><input type="radio" name="se26" value="1" required><span>1</span></label>
+                                    <label><input type="radio" name="se26" value="2"><span>2</span></label>
+                                    <label><input type="radio" name="se26" value="3"><span>3</span></label>
+                                    <label><input type="radio" name="se26" value="4"><span>4</span></label>
+                                    <label><input type="radio" name="se26" value="5"><span>5</span></label>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Technical Skills -->
+                    <!-- Part 5: Teamwork Preferences -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">06</span>
-                            技術能力自評 Technical Skills Self-Assessment
+                            團隊合作偏好 Teamwork Preferences
                         </h3>
-                        <p class="section-desc">請評估您在以下領域的能力 (1=初學者, 5=專家)</p>
 
-                        <div class="skills-grid">
-                            <div class="skill-item">
-                                <label>資訊系統概念</label>
-                                <div class="skill-rating">
-                                    <input type="radio" name="skill1" value="1" required><span>1</span>
-                                    <input type="radio" name="skill1" value="2"><span>2</span>
-                                    <input type="radio" name="skill1" value="3"><span>3</span>
-                                    <input type="radio" name="skill1" value="4"><span>4</span>
-                                    <input type="radio" name="skill1" value="5"><span>5</span>
-                                </div>
+                        <div class="subsection">
+                            <h4>27. 團隊合作經驗 Teamwork Experience <span class="required">*</span></h4>
+                            <p class="section-desc">請問您過去參與團隊合作的經驗如何？</p>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="teamExp" value="5" required>
+                                    <span>非常豐富（參與過 5 次以上團隊專案）Very extensive (5+ team projects)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="teamExp" value="4">
+                                    <span>豐富（參與過 3-4 次團隊專案）Extensive (3-4 team projects)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="teamExp" value="3">
+                                    <span>一般（參與過 1-2 次團隊專案）Moderate (1-2 team projects)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="teamExp" value="2">
+                                    <span>有限（很少參與團隊專案）Limited (rarely participated)</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="teamExp" value="1">
+                                    <span>沒有經驗 No experience</span>
+                                </label>
                             </div>
+                        </div>
 
-                            <div class="skill-item">
-                                <label>簡報製作能力</label>
-                                <div class="skill-rating">
-                                    <input type="radio" name="skill2" value="1" required><span>1</span>
-                                    <input type="radio" name="skill2" value="2"><span>2</span>
-                                    <input type="radio" name="skill2" value="3"><span>3</span>
-                                    <input type="radio" name="skill2" value="4"><span>4</span>
-                                    <input type="radio" name="skill2" value="5"><span>5</span>
-                                </div>
+                        <div class="subsection">
+                            <h4>28. 在團隊中的偏好角色 Preferred Role in Team</h4>
+                            <p class="section-desc">在團隊合作中，您比較喜歡扮演什麼角色？（可複選）</p>
+                            <div class="checkbox-group two-columns">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="leader">
+                                    <span>領導者 Leader（協調整個團隊）</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="ideator">
+                                    <span>創意發想者 Idea Generator（提供新想法）</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="implementer">
+                                    <span>執行者 Implementer（落實計畫）</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="analyzer">
+                                    <span>分析者 Analyzer（分析問題）</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="facilitator">
+                                    <span>協調者 Facilitator（促進溝通）</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="researcher">
+                                    <span>資料蒐集者 Researcher（搜集資訊）</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="presenter">
+                                    <span>簡報者 Presenter（對外報告）</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamRole" value="none">
+                                    <span>沒有特別偏好 No particular preference</span>
+                                </label>
                             </div>
+                        </div>
 
-                            <div class="skill-item">
-                                <label>資料分析能力</label>
-                                <div class="skill-rating">
-                                    <input type="radio" name="skill3" value="1" required><span>1</span>
-                                    <input type="radio" name="skill3" value="2"><span>2</span>
-                                    <input type="radio" name="skill3" value="3"><span>3</span>
-                                    <input type="radio" name="skill3" value="4"><span>4</span>
-                                    <input type="radio" name="skill3" value="5"><span>5</span>
-                                </div>
+                        <div class="subsection">
+                            <h4>29. 團隊溝通時段偏好 Preferred Communication Time</h4>
+                            <p class="section-desc">您比較方便參與團隊討論的時段是？（可複選）</p>
+                            <div class="checkbox-group two-columns">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamTime" value="weekday_morning">
+                                    <span>平日早上 Weekday mornings</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamTime" value="weekday_afternoon">
+                                    <span>平日下午 Weekday afternoons</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamTime" value="weekday_evening">
+                                    <span>平日晚上 Weekday evenings</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamTime" value="weekend_morning">
+                                    <span>週末早上 Weekend mornings</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamTime" value="weekend_afternoon">
+                                    <span>週末下午 Weekend afternoons</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamTime" value="weekend_evening">
+                                    <span>週末晚上 Weekend evenings</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="teamTime" value="flexible">
+                                    <span>彈性配合 Flexible</span>
+                                </label>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="skill-item">
-                                <label>英文讀寫能力</label>
-                                <div class="skill-rating">
-                                    <input type="radio" name="skill4" value="1" required><span>1</span>
-                                    <input type="radio" name="skill4" value="2"><span>2</span>
-                                    <input type="radio" name="skill4" value="3"><span>3</span>
-                                    <input type="radio" name="skill4" value="4"><span>4</span>
-                                    <input type="radio" name="skill4" value="5"><span>5</span>
-                                </div>
-                            </div>
+                    <!-- Part 6: Open-ended Questions -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <span class="section-number">07</span>
+                            開放式問題 Open-ended Questions
+                        </h3>
+
+                        <div class="form-group">
+                            <label for="bestExperience">30. 最好的學習經驗 Best Learning Experience</label>
+                            <p class="field-desc">請描述一次讓您印象深刻的正面學習經驗</p>
+                            <textarea id="bestExperience" name="bestExperience" rows="3" 
+                                placeholder="例如：什麼課程？什麼教學方式？為什麼讓您覺得有收穫？"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="worstExperience">最差的學習經驗 Worst Learning Experience</label>
+                            <p class="field-desc">請描述一次讓您感到挫折或不愉快的學習經驗</p>
+                            <textarea id="worstExperience" name="worstExperience" rows="3" 
+                                placeholder="例如：遇到什麼困難？什麼原因導致學習效果不佳？"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="teamLearning">31. 您希望從團隊合作中學到什麼？</label>
+                            <textarea id="teamLearning" name="teamLearning" rows="2" 
+                                placeholder="What do you hope to learn from teamwork?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="teamContribution">32. 您認為自己在團隊中可以貢獻什麼？</label>
+                            <textarea id="teamContribution" name="teamContribution" rows="2" 
+                                placeholder="What do you think you can contribute to a team?"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="specialNeeds">33. 對本課程的特別需求 Special Needs</label>
+                            <p class="field-desc">請說明您在修習本課程時是否有任何特別需求或考量（如不願在此說明，也可以私下與教師討論）</p>
+                            <textarea id="specialNeeds" name="specialNeeds" rows="2" 
+                                placeholder="例如：學習障礙支持、宗教因素、健康狀況、工作時間限制等"></textarea>
                         </div>
                     </div>
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <span>提交問卷</span>
+                            <span>提交問卷並查看結果</span>
                             <span class="btn-icon">→</span>
                         </button>
                     </div>
@@ -344,16 +826,100 @@
                 <!-- Loading Overlay -->
                 <div id="loadingOverlay" class="loading-overlay hidden">
                     <div class="loading-spinner"></div>
-                    <p>正在提交資料...</p>
+                    <p>正在分析您的資料...</p>
                 </div>
             </div>
 
-            <!-- Success Message -->
-            <div id="successMessage" class="success-message hidden">
-                <div class="success-icon">✓</div>
-                <h2>問卷提交成功！</h2>
-                <p>感謝您的參與，分組結果將於課堂上公布。</p>
-                <button class="btn btn-secondary" onclick="location.reload()">填寫新問卷</button>
+            <!-- Results Section (shown after submit) -->
+            <div id="resultsSection" class="results-section hidden">
+                <div class="results-card">
+                    <div class="results-header">
+                        <div class="success-icon">✓</div>
+                        <h2>問卷提交成功！</h2>
+                        <p>感謝您的參與，以下是您的學習者類型分析</p>
+                    </div>
+
+                    <div class="profile-summary">
+                        <h3 id="studentNameDisplay"></h3>
+                        <p class="student-id-display" id="studentIdDisplay"></p>
+                    </div>
+
+                    <div class="results-grid">
+                        <!-- Learning Profile Card -->
+                        <div class="result-card">
+                            <div class="result-icon">📚</div>
+                            <h4>先備知識程度</h4>
+                            <div class="result-meter">
+                                <div class="meter-fill" id="knowledgeMeter"></div>
+                            </div>
+                            <p class="result-label" id="knowledgeLabel">中等</p>
+                            <p class="result-score" id="knowledgeScore"></p>
+                        </div>
+
+                        <!-- IT Skills Card -->
+                        <div class="result-card">
+                            <div class="result-icon">💻</div>
+                            <h4>資訊科技能力</h4>
+                            <div class="result-meter">
+                                <div class="meter-fill" id="itMeter"></div>
+                            </div>
+                            <p class="result-label" id="itLabel">中等</p>
+                            <p class="result-score" id="itScore"></p>
+                        </div>
+
+                        <!-- Motivation Card -->
+                        <div class="result-card">
+                            <div class="result-icon">🎯</div>
+                            <h4>學習動機類型</h4>
+                            <div class="motivation-type" id="motivationType">
+                                <span class="type-badge intrinsic">內在導向</span>
+                            </div>
+                            <p class="result-detail" id="motivationDetail"></p>
+                        </div>
+
+                        <!-- Self-Efficacy Card -->
+                        <div class="result-card">
+                            <div class="result-icon">💪</div>
+                            <h4>自我效能感</h4>
+                            <div class="result-meter">
+                                <div class="meter-fill" id="efficacyMeter"></div>
+                            </div>
+                            <p class="result-label" id="efficacyLabel">中等</p>
+                            <p class="result-score" id="efficacyScore"></p>
+                        </div>
+
+                        <!-- Team Role Card -->
+                        <div class="result-card wide">
+                            <div class="result-icon">👥</div>
+                            <h4>您的團隊角色傾向</h4>
+                            <div class="team-roles" id="teamRoles">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Language Profile Card -->
+                        <div class="result-card wide">
+                            <div class="result-icon">🌍</div>
+                            <h4>語言能力概況</h4>
+                            <div class="language-bars" id="languageBars">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-note">
+                        <p>💡 <strong>說明：</strong>此分析結果僅供參考，將用於協助教師進行公平且有效的分組。最終分組結果將於課堂上公布。</p>
+                    </div>
+
+                    <div class="results-actions">
+                        <button class="btn btn-secondary" onclick="window.print()">
+                            <span>🖨️</span> 列印結果
+                        </button>
+                        <button class="btn btn-primary" onclick="location.reload()">
+                            <span>📝</span> 填寫新問卷
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Error Message -->
@@ -365,9 +931,8 @@
             </div>
         </section>
 
-        <!-- Admin Section -->
+        <!-- Admin Section (same as before) -->
         <section id="admin" class="section">
-            <!-- Password Login -->
             <div id="adminLogin" class="admin-login">
                 <div class="login-card">
                     <div class="login-icon">🔐</div>
@@ -386,7 +951,6 @@
                 </div>
             </div>
 
-            <!-- Admin Content (Hidden until login) -->
             <div id="adminContent" class="admin-content hidden">
                 <div class="admin-toolbar">
                     <button id="refreshData" class="btn btn-secondary">
@@ -411,17 +975,24 @@
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">🌐</div>
+                        <div class="stat-icon">👨</div>
                         <div class="stat-content">
-                            <span class="stat-number" id="classACount">0</span>
-                            <span class="stat-label">MIS 全英班</span>
+                            <span class="stat-number" id="maleCount">0</span>
+                            <span class="stat-label">男性</span>
                         </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-icon">📚</div>
+                        <div class="stat-icon">👩</div>
                         <div class="stat-content">
-                            <span class="stat-number" id="classBCount">0</span>
-                            <span class="stat-label">管理資訊系統 中文班</span>
+                            <span class="stat-number" id="femaleCount">0</span>
+                            <span class="stat-label">女性</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🌍</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="intlCount">0</span>
+                            <span class="stat-label">國際學生</span>
                         </div>
                     </div>
                 </div>
@@ -433,16 +1004,15 @@
                             <label>
                                 每組人數：
                                 <select id="groupSize">
-                                    <option value="3">3人</option>
                                     <option value="4">4人</option>
                                     <option value="5" selected>5人</option>
+                                    <option value="6">6人</option>
                                 </select>
                             </label>
                             <label>
                                 分組策略：
                                 <select id="groupStrategy">
-                                    <option value="heterogeneous">異質分組 (推薦)</option>
-                                    <option value="homogeneous">同質分組</option>
+                                    <option value="heterogeneous">異質分組（推薦）</option>
                                     <option value="balanced">均衡分組</option>
                                 </select>
                             </label>
@@ -462,7 +1032,6 @@
                     </div>
                 </div>
 
-                <!-- Student Data Table -->
                 <div class="data-section">
                     <h3>學生問卷資料</h3>
                     <div class="table-container">
@@ -471,39 +1040,28 @@
                                 <tr>
                                     <th>學號</th>
                                     <th>姓名</th>
-                                    <th>班級</th>
-                                    <th>動機分數</th>
-                                    <th>效能分數</th>
-                                    <th>團隊分數</th>
-                                    <th>認知風格</th>
-                                    <th>角色傾向</th>
+                                    <th>性別</th>
+                                    <th>國籍</th>
+                                    <th>先備知識</th>
+                                    <th>IT能力</th>
+                                    <th>動機類型</th>
+                                    <th>自我效能</th>
+                                    <th>團隊經驗</th>
                                 </tr>
                             </thead>
                             <tbody id="studentTableBody">
-                                <!-- Data will be populated here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Grouping Results -->
                 <div id="groupingResults" class="grouping-results hidden">
                     <h3>分組結果</h3>
-                    <div class="class-groups">
-                        <div class="class-section">
-                            <h4>MIS 全英班 (9:00-12:00)</h4>
-                            <div id="classAGroups" class="groups-container"></div>
-                        </div>
-                        <div class="class-section">
-                            <h4>管理資訊系統 中文班 (2:00-5:00)</h4>
-                            <div id="classBGroups" class="groups-container"></div>
-                        </div>
-                    </div>
+                    <div id="groupsContainer" class="groups-container"></div>
                 </div>
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="footer">
             <p>© 2025 國立東華大學 資訊管理學系 | 教學實踐研究計畫</p>
         </footer>
