@@ -18,7 +18,7 @@
                     <span class="title-zh">Team-Based Learning 分組資料調查表</span>
                     <span class="title-en">Team-Based Learning Grouping Survey</span>
                 </h1>
-                <p class="subtitle">國立東華大學 資訊管理學系</p>
+                <p class="subtitle">國立東華大學 資訊管理學系<br>National Dong Hwa University, Department of Information Management</p>
             </div>
             <!-- Hidden admin access -->
             <nav id="navTabs" class="nav-tabs hidden">
@@ -37,10 +37,10 @@
         <section id="questionnaire" class="section active">
             <div class="card questionnaire-card">
                 <div class="card-header">
-                    <h2>分組資料調查表</h2>
+                    <h2>分組資料調查表 Grouping Survey</h2>
                     <p class="card-subtitle">
-                        為了讓課程分組更加公平且有效，請您協助填寫以下資料。<br>
-                        這些資訊將僅用於分組參考，不會影響您的成績。
+                        為了讓課程分組更加公平且有效，請您協助填寫以下資料。這些資訊將僅用於分組參考，不會影響您的成績。<br>
+                        <span class="subtitle-en">To ensure fair and effective team formation, please complete the following survey. This information will only be used for grouping purposes and will not affect your grades.</span>
                     </p>
                 </div>
 
@@ -55,11 +55,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="studentId">學號 Student ID <span class="required">*</span></label>
-                                <input type="text" id="studentId" name="studentId" required placeholder="例如：410812345">
+                                <input type="text" id="studentId" name="studentId" required placeholder="e.g., 410812345">
                             </div>
                             <div class="form-group">
                                 <label for="studentName">姓名 Name <span class="required">*</span></label>
-                                <input type="text" id="studentName" name="studentName" required placeholder="請輸入您的姓名">
+                                <input type="text" id="studentName" name="studentName" required placeholder="Enter your name 請輸入姓名">
                             </div>
                         </div>
 
@@ -102,7 +102,7 @@
                                     <label class="radio-option other-option">
                                         <input type="radio" name="nationality" value="other">
                                         <span>其他 Other:</span>
-                                        <input type="text" name="nationalityOther" class="inline-input" placeholder="請說明">
+                                        <input type="text" name="nationalityOther" class="inline-input" placeholder="Please specify 請說明">
                                     </label>
                                 </div>
                             </div>
@@ -122,8 +122,8 @@
                                     </label>
                                     <label class="radio-option other-option">
                                         <input type="radio" name="nativeLanguage" value="other">
-                                        <span>其他:</span>
-                                        <input type="text" name="nativeLanguageOther" class="inline-input" placeholder="請說明">
+                                        <span>其他 Other:</span>
+                                        <input type="text" name="nativeLanguageOther" class="inline-input" placeholder="Please specify 請說明">
                                     </label>
                                 </div>
                             </div>
@@ -139,7 +139,7 @@
                         
                         <div class="subsection">
                             <h4>英語能力 English Proficiency <span class="required">*</span></h4>
-                            <p class="section-desc">請評估您的英語能力（1=非常不好，5=非常好）</p>
+                            <p class="section-desc">請評估您的英語能力（1=非常不好，5=非常好）<br>Please rate your English proficiency (1=Very Poor, 5=Excellent)</p>
                             <div class="rating-table">
                                 <div class="rating-row header">
                                     <div class="rating-label">項目 Item</div>
@@ -191,8 +191,8 @@
                         </div>
 
                         <div class="subsection" id="chineseProficiency">
-                            <h4>中文能力自評 Chinese Proficiency（針對非中文母語者）</h4>
-                            <p class="section-desc">請評估您的中文能力（1=非常不好，5=非常好）</p>
+                            <h4>中文能力自評 Chinese Proficiency (For non-native Chinese speakers)</h4>
+                            <p class="section-desc">請評估您的中文能力（1=非常不好，5=非常好）<br>Please rate your Chinese proficiency (1=Very Poor, 5=Excellent)</p>
                             <div class="rating-table">
                                 <div class="rating-row header">
                                     <div class="rating-label">項目 Item</div>
@@ -253,7 +253,7 @@
 
                         <div class="subsection">
                             <h4>相關課程修習經驗 Related Course Experience</h4>
-                            <p class="section-desc">請勾選您曾修習過的相關課程（可複選）</p>
+                            <p class="section-desc">請勾選您曾修習過的相關課程（可複選）<br>Please check the related courses you have taken (multiple selections allowed)</p>
                             <div class="checkbox-group">
                                 <label class="checkbox-option">
                                     <input type="checkbox" name="courses" value="intro_cs">
@@ -282,7 +282,7 @@
                                 <label class="checkbox-option other-option">
                                     <input type="checkbox" name="courses" value="other">
                                     <span>其他 Other:</span>
-                                    <input type="text" name="coursesOther" class="inline-input" placeholder="請說明">
+                                    <input type="text" name="coursesOther" class="inline-input" placeholder="Please specify 請說明">
                                 </label>
                                 <label class="checkbox-option">
                                     <input type="checkbox" name="courses" value="none" id="coursesNone">
@@ -293,7 +293,7 @@
 
                         <div class="subsection">
                             <h4>資訊科技使用經驗 IT Experience <span class="required">*</span></h4>
-                            <p class="section-desc">請評估您對以下資訊科技工具的熟悉程度（1=完全不熟悉，5=非常熟悉）</p>
+                            <p class="section-desc">請評估您對以下資訊科技工具的熟悉程度（1=完全不熟悉，5=非常熟悉）<br>Please rate your familiarity with the following IT tools (1=Not familiar at all, 5=Very familiar)</p>
                             <div class="rating-table">
                                 <div class="rating-row header">
                                     <div class="rating-label">工具 Tool</div>
@@ -366,7 +366,7 @@
 
                         <div class="subsection">
                             <h4>管理知識背景 Management Knowledge <span class="required">*</span></h4>
-                            <p class="section-desc">請評估您對以下管理概念的理解程度（1=完全不了解，5=非常了解）</p>
+                            <p class="section-desc">請評估您對以下管理概念的理解程度（1=完全不了解，5=非常了解）<br>Please rate your understanding of the following management concepts (1=No understanding, 5=Very good understanding)</p>
                             <div class="rating-table">
                                 <div class="rating-row header">
                                     <div class="rating-label">概念 Concept</div>
@@ -662,7 +662,7 @@
 
                         <div class="subsection">
                             <h4>27. 團隊合作經驗 Teamwork Experience <span class="required">*</span></h4>
-                            <p class="section-desc">請問您過去參與團隊合作的經驗如何？</p>
+                            <p class="section-desc">請問您過去參與團隊合作的經驗如何？<br>How would you describe your past teamwork experience?</p>
                             <div class="radio-group">
                                 <label class="radio-option">
                                     <input type="radio" name="teamExp" value="5" required>
@@ -689,7 +689,7 @@
 
                         <div class="subsection">
                             <h4>28. 在團隊中的偏好角色 Preferred Role in Team</h4>
-                            <p class="section-desc">在團隊合作中，您比較喜歡扮演什麼角色？（可複選）</p>
+                            <p class="section-desc">在團隊合作中，您比較喜歡扮演什麼角色？（可複選）<br>In teamwork, which role(s) do you prefer? (Multiple selections allowed)</p>
                             <div class="checkbox-group two-columns">
                                 <label class="checkbox-option">
                                     <input type="checkbox" name="teamRole" value="leader">
@@ -728,7 +728,7 @@
 
                         <div class="subsection">
                             <h4>29. 團隊溝通時段偏好 Preferred Communication Time</h4>
-                            <p class="section-desc">您比較方便參與團隊討論的時段是？（可複選）</p>
+                            <p class="section-desc">您比較方便參與團隊討論的時段是？（可複選）<br>When are you most available for team discussions? (Multiple selections allowed)</p>
                             <div class="checkbox-group two-columns">
                                 <label class="checkbox-option">
                                     <input type="checkbox" name="teamTime" value="weekday_morning">
@@ -771,41 +771,41 @@
 
                         <div class="form-group">
                             <label for="bestExperience">30. 最好的學習經驗 Best Learning Experience</label>
-                            <p class="field-desc">請描述一次讓您印象深刻的正面學習經驗</p>
+                            <p class="field-desc">請描述一次讓您印象深刻的正面學習經驗<br>Please describe a positive learning experience that left a strong impression on you</p>
                             <textarea id="bestExperience" name="bestExperience" rows="3" 
-                                placeholder="例如：什麼課程？什麼教學方式？為什麼讓您覺得有收穫？"></textarea>
+                                placeholder="Which course? What teaching method? Why did you find it valuable? 什麼課程？什麼教學方式？為什麼讓您覺得有收穫？"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="worstExperience">最差的學習經驗 Worst Learning Experience</label>
-                            <p class="field-desc">請描述一次讓您感到挫折或不愉快的學習經驗</p>
+                            <p class="field-desc">請描述一次讓您感到挫折或不愉快的學習經驗<br>Please describe a learning experience that was frustrating or unpleasant</p>
                             <textarea id="worstExperience" name="worstExperience" rows="3" 
-                                placeholder="例如：遇到什麼困難？什麼原因導致學習效果不佳？"></textarea>
+                                placeholder="What difficulties did you encounter? What caused the poor learning outcome? 遇到什麼困難？什麼原因導致學習效果不佳？"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="teamLearning">31. 您希望從團隊合作中學到什麼？</label>
+                            <label for="teamLearning">31. 您希望從團隊合作中學到什麼？What do you hope to learn from teamwork?</label>
                             <textarea id="teamLearning" name="teamLearning" rows="2" 
-                                placeholder="What do you hope to learn from teamwork?"></textarea>
+                                placeholder="請分享您的期望 Please share your expectations"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="teamContribution">32. 您認為自己在團隊中可以貢獻什麼？</label>
+                            <label for="teamContribution">32. 您認為自己在團隊中可以貢獻什麼？What do you think you can contribute to a team?</label>
                             <textarea id="teamContribution" name="teamContribution" rows="2" 
-                                placeholder="What do you think you can contribute to a team?"></textarea>
+                                placeholder="請分享您的想法 Please share your thoughts"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="specialNeeds">33. 對本課程的特別需求 Special Needs</label>
-                            <p class="field-desc">請說明您在修習本課程時是否有任何特別需求或考量（如不願在此說明，也可以私下與教師討論）</p>
+                            <label for="specialNeeds">33. 對本課程的特別需求 Special Needs for This Course</label>
+                            <p class="field-desc">請說明您在修習本課程時是否有任何特別需求或考量（如不願在此說明，也可以私下與教師討論）<br>Please indicate if you have any special needs or considerations. If you prefer not to disclose here, you may discuss privately with the instructor.</p>
                             <textarea id="specialNeeds" name="specialNeeds" rows="2" 
-                                placeholder="例如：學習障礙支持、宗教因素、健康狀況、工作時間限制等"></textarea>
+                                placeholder="e.g., learning disability support, religious factors, health conditions, work schedule constraints 例如：學習障礙支持、宗教因素、健康狀況、工作時間限制等"></textarea>
                         </div>
                     </div>
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <span>提交問卷並查看結果</span>
+                            <span>提交問卷並查看結果 Submit and View Results</span>
                             <span class="btn-icon">→</span>
                         </button>
                     </div>
@@ -814,7 +814,7 @@
                 <!-- Loading Overlay -->
                 <div id="loadingOverlay" class="loading-overlay hidden">
                     <div class="loading-spinner"></div>
-                    <p>正在分析您的資料...</p>
+                    <p>正在分析您的資料... Analyzing your data...</p>
                 </div>
             </div>
 
@@ -823,8 +823,8 @@
                 <div class="results-card">
                     <div class="results-header">
                         <div class="success-icon">✓</div>
-                        <h2>問卷提交成功！</h2>
-                        <p>感謝您的參與，以下是您的學習者類型分析</p>
+                        <h2>問卷提交成功！Survey Submitted Successfully!</h2>
+                        <p>感謝您的參與，以下是您的學習者類型分析<br>Thank you for your participation. Below is your learner profile analysis.</p>
                     </div>
 
                     <div class="profile-summary">
@@ -836,7 +836,7 @@
                         <!-- Learning Profile Card -->
                         <div class="result-card">
                             <div class="result-icon">📚</div>
-                            <h4>先備知識程度</h4>
+                            <h4>先備知識程度 Prior Knowledge</h4>
                             <div class="result-meter">
                                 <div class="meter-fill" id="knowledgeMeter"></div>
                             </div>
@@ -847,7 +847,7 @@
                         <!-- IT Skills Card -->
                         <div class="result-card">
                             <div class="result-icon">💻</div>
-                            <h4>資訊科技能力</h4>
+                            <h4>資訊科技能力 IT Skills</h4>
                             <div class="result-meter">
                                 <div class="meter-fill" id="itMeter"></div>
                             </div>
@@ -858,7 +858,7 @@
                         <!-- Motivation Card -->
                         <div class="result-card">
                             <div class="result-icon">🎯</div>
-                            <h4>學習動機類型</h4>
+                            <h4>學習動機類型 Motivation Type</h4>
                             <div class="motivation-type" id="motivationType">
                                 <span class="type-badge intrinsic">內在導向</span>
                             </div>
@@ -868,7 +868,7 @@
                         <!-- Self-Efficacy Card -->
                         <div class="result-card">
                             <div class="result-icon">💪</div>
-                            <h4>自我效能感</h4>
+                            <h4>自我效能感 Self-Efficacy</h4>
                             <div class="result-meter">
                                 <div class="meter-fill" id="efficacyMeter"></div>
                             </div>
@@ -879,7 +879,7 @@
                         <!-- Team Role Card -->
                         <div class="result-card wide">
                             <div class="result-icon">👥</div>
-                            <h4>您的團隊角色傾向</h4>
+                            <h4>您的團隊角色傾向 Your Team Role Preferences</h4>
                             <div class="team-roles" id="teamRoles">
                                 <!-- Will be populated dynamically -->
                             </div>
@@ -888,7 +888,7 @@
                         <!-- Language Profile Card -->
                         <div class="result-card wide">
                             <div class="result-icon">🌍</div>
-                            <h4>語言能力概況</h4>
+                            <h4>語言能力概況 Language Proficiency</h4>
                             <div class="language-bars" id="languageBars">
                                 <!-- Will be populated dynamically -->
                             </div>
@@ -896,15 +896,15 @@
                     </div>
 
                     <div class="results-note">
-                        <p>💡 <strong>說明：</strong>此分析結果僅供參考，將用於協助教師進行公平且有效的分組。最終分組結果將於課堂上公布。</p>
+                        <p>💡 <strong>說明 Note：</strong>此分析結果僅供參考，將用於協助教師進行公平且有效的分組。最終分組結果將於課堂上公布。<br>This analysis is for reference only and will be used to assist the instructor in fair and effective team formation. Final grouping results will be announced in class.</p>
                     </div>
 
                     <div class="results-actions">
                         <button class="btn btn-secondary" onclick="window.print()">
-                            <span>🖨️</span> 列印結果
+                            <span>🖨️</span> 列印結果 Print
                         </button>
                         <button class="btn btn-primary" onclick="location.reload()">
-                            <span>📝</span> 填寫新問卷
+                            <span>📝</span> 填寫新問卷 New Survey
                         </button>
                     </div>
                 </div>
@@ -1051,7 +1051,7 @@
         </section>
 
         <footer class="footer">
-            <p>© 2025 國立東華大學 資訊管理學系 | 教學實踐研究計畫</p>
+            <p>© 2025 國立東華大學 資訊管理學系 National Dong Hwa University | 教學實踐研究計畫 Teaching Practice Research Program</p>
         </footer>
     </div>
 
