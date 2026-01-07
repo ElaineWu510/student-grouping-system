@@ -4,11 +4,26 @@
 // ==========================================
 
 // ============ 設定 ============
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3aLFOVziYkIe2hpKng7RMfKxXIvs7lPQbPiCbOz9UNZM90fS5OomLJBAmSOpjAoaptA/exec';
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
 const ADMIN_SESSION_KEY = 'adminLoggedIn';
 
 let cachedStudents = [];
 let adminPassword = '';
+
+// 動態載入 SheetJS 庫（用於產生 xlsx 檔案）
+function loadSheetJS() {
+    return new Promise((resolve, reject) => {
+        if (window.XLSX) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
 
 // ==========================================
 // 初始化
@@ -910,70 +925,45 @@ function downloadReport() {
     a.click();
 }
 
-function downloadExcel() {
+async function downloadExcel() {
     const groups = JSON.parse(localStorage.getItem('groupingResults') || '[]');
     if (groups.length === 0) {
         alert('請先執行分組！');
         return;
     }
     
-    // 建立 Excel XML 格式 (SpreadsheetML)
+    // 載入 SheetJS
+    try {
+        await loadSheetJS();
+    } catch (error) {
+        alert('載入 Excel 庫失敗，請檢查網路連線');
+        return;
+    }
+    
     const now = new Date();
     const motivationTypeNames = { intrinsic: '內在導向', extrinsic: '外在導向', balanced: '均衡型' };
+    const courseNames = {
+        'management': '管理學',
+        'intro_cs': '計算機概論',
+        'database': '資料庫管理',
+        'crm': '顧客關係管理',
+        'ecommerce': '電子商務',
+        'none': '無'
+    };
     
-    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <Styles>
-  <Style ss:ID="Header">
-   <Font ss:Bold="1" ss:Size="12"/>
-   <Interior ss:Color="#1e3a5f" ss:Pattern="Solid"/>
-   <Font ss:Color="#FFFFFF" ss:Bold="1"/>
-  </Style>
-  <Style ss:ID="Wrap">
-   <Alignment ss:WrapText="1" ss:Vertical="Top"/>
-  </Style>
- </Styles>
- <Worksheet ss:Name="分組結果">
-  <Table>
-   <Column ss:Width="80"/>
-   <Column ss:Width="80"/>
-   <Column ss:Width="50"/>
-   <Column ss:Width="70"/>
-   <Column ss:Width="100"/>
-   <Column ss:Width="120"/>
-   <Column ss:Width="80"/>
-   <Column ss:Width="70"/>
-   <Column ss:Width="200"/>
-   <Column ss:Width="200"/>
-   <Row>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">學號</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">姓名</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">組別</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">綜合分數</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">語言能力</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">先備知識</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">學習動機</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">自我效能</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">最差的學習經驗</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">對本課程的特別需求</Data></Cell>
-   </Row>`;
+    // 準備資料
+    const data = [];
     
+    // 標題列
+    data.push(['學號', '姓名', '組別', '綜合分數', '語言能力', '先備知識', '學習動機', '自我效能', '最差的學習經驗', '對本課程的特別需求']);
+    
+    // 資料列
     groups.forEach((group, groupIndex) => {
         group.forEach(s => {
-            // 語言能力：英文 X.X / 中文 X.X
+            // 語言能力
             const langStr = `英文 ${s.engAvg || '-'} / 中文 ${s.chnAvg || '-'}`;
             
-            // 先備知識：修過的課程
-            const courseNames = {
-                'management': '管理學',
-                'intro_cs': '計算機概論',
-                'database': '資料庫管理',
-                'crm': '顧客關係管理',
-                'ecommerce': '電子商務',
-                'none': '無'
-            };
+            // 先備知識
             let priorStr = '-';
             if (s.courses) {
                 const courseList = s.courses.split(',').filter(c => c && c !== 'none');
@@ -984,44 +974,50 @@ function downloadExcel() {
                 }
             }
             
-            // 學習動機類型
+            // 學習動機
             const motivationType = motivationTypeNames[s.motivationType] || s.motivationType || '-';
             
-            // 自我效能分數
+            // 自我效能
             const efficacyStr = s.selfEfficacy ? parseFloat(s.selfEfficacy).toFixed(1) : '-';
             
-            // 最差學習經驗
-            const worstExp = s.worstExperience || '';
-            
-            // 特別需求
-            const specialNeeds = s.specialNeeds || '';
-            
-            xmlContent += `
-   <Row ss:Height="45">
-    <Cell><Data ss:Type="String">${escapeXml(s.studentId || '')}</Data></Cell>
-    <Cell><Data ss:Type="String">${escapeXml(s.studentName || '')}</Data></Cell>
-    <Cell><Data ss:Type="Number">${groupIndex + 1}</Data></Cell>
-    <Cell><Data ss:Type="Number">${s.compositeScore ? s.compositeScore.toFixed(2) : 0}</Data></Cell>
-    <Cell><Data ss:Type="String">${escapeXml(langStr)}</Data></Cell>
-    <Cell ss:StyleID="Wrap"><Data ss:Type="String">${escapeXml(priorStr)}</Data></Cell>
-    <Cell><Data ss:Type="String">${escapeXml(motivationType)}</Data></Cell>
-    <Cell><Data ss:Type="String">${escapeXml(efficacyStr)}</Data></Cell>
-    <Cell ss:StyleID="Wrap"><Data ss:Type="String">${escapeXml(worstExp)}</Data></Cell>
-    <Cell ss:StyleID="Wrap"><Data ss:Type="String">${escapeXml(specialNeeds)}</Data></Cell>
-   </Row>`;
+            data.push([
+                s.studentId || '',
+                s.studentName || '',
+                groupIndex + 1,
+                s.compositeScore ? parseFloat(s.compositeScore.toFixed(2)) : 0,
+                langStr,
+                priorStr,
+                motivationType,
+                efficacyStr,
+                s.worstExperience || '',
+                s.specialNeeds || ''
+            ]);
         });
     });
     
-    xmlContent += `
-  </Table>
- </Worksheet>
-</Workbook>`;
+    // 建立工作表
+    const ws = XLSX.utils.aoa_to_sheet(data);
     
-    const blob = new Blob([xmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `分組報告_${now.toISOString().split('T')[0]}.xls`;
-    a.click();
+    // 設定欄寬
+    ws['!cols'] = [
+        { wch: 12 },  // 學號
+        { wch: 10 },  // 姓名
+        { wch: 6 },   // 組別
+        { wch: 10 },  // 綜合分數
+        { wch: 20 },  // 語言能力
+        { wch: 25 },  // 先備知識
+        { wch: 10 },  // 學習動機
+        { wch: 10 },  // 自我效能
+        { wch: 40 },  // 最差的學習經驗
+        { wch: 40 }   // 對本課程的特別需求
+    ];
+    
+    // 建立工作簿
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '分組結果');
+    
+    // 下載
+    XLSX.writeFile(wb, `分組報告_${now.toISOString().split('T')[0]}.xlsx`);
 }
 
 function escapeXml(str) {
