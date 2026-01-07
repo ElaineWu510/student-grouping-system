@@ -74,6 +74,7 @@ body {
 }
 .card-header h2 { font-size: 1.5rem; margin-bottom: 10px; }
 .card-subtitle { opacity: 0.9; font-size: 0.95rem; line-height: 1.6; }
+.card-subtitle .subtitle-en { display: block; margin-top: 10px; font-size: 0.9rem; opacity: 0.85; }
 
 /* Form Styles */
 .form { padding: 30px; }
@@ -152,7 +153,26 @@ textarea { resize: vertical; min-height: 60px; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 .btn-secondary { background: var(--primary); color: var(--white); }
 .btn-secondary:hover { background: var(--primary-light); }
+.btn-success { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: var(--white); box-shadow: 0 4px 15px rgba(39,174,96,0.3); }
+.btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(39,174,96,0.4); }
 .form-actions { text-align: center; padding-top: 20px; }
+
+/* Stats Detail Section */
+.stats-detail-section { background: var(--white); padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 25px; }
+.stats-detail-section h3 { color: var(--primary); margin-bottom: 20px; font-size: 1.2rem; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.stats-card { background: #f8f9fa; border-radius: var(--radius-sm); padding: 20px; border-left: 4px solid var(--primary); }
+.stats-card.wide { grid-column: span 2; }
+.stats-card h4 { color: var(--primary); margin-bottom: 15px; font-size: 1rem; }
+.stats-content { display: flex; flex-direction: column; gap: 8px; }
+.stat-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 5px 0; border-bottom: 1px dashed #dee2e6; }
+.stat-row:last-child { border-bottom: none; }
+.stat-row span:last-child { font-weight: 600; color: var(--primary); }
+.worst-exp-list { max-height: 200px; overflow-y: auto; }
+.worst-exp-item { background: #fff; padding: 10px 15px; margin-bottom: 8px; border-radius: var(--radius-sm); border-left: 3px solid var(--danger); font-size: 0.9rem; }
+.worst-exp-item .student-info { font-weight: 600; color: var(--text); margin-bottom: 5px; }
+.worst-exp-item .exp-content { color: var(--text-light); }
+.no-data { color: var(--text-light); font-style: italic; }
 
 /* Loading */
 .loading-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
@@ -283,6 +303,8 @@ tr:hover { background: #f8f9fa; }
     .admin-stats { grid-template-columns: repeat(2, 1fr); }
     .button-group { flex-direction: column; }
     .btn { width: 100%; justify-content: center; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .stats-card.wide { grid-column: span 1; }
 }
 
 /* Print */
