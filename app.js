@@ -4,7 +4,7 @@
 // ==========================================
 
 // ============ 設定 ============
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzf2jRnkveqbD_u02PscrujdusywkevvdQSV0EZneKyFdewGYfFHXBKCI3mbFTlQ2b7Fg/exec';
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
 const ADMIN_SESSION_KEY = 'adminLoggedIn';
 
 let cachedStudents = [];
@@ -121,14 +121,16 @@ function collectFormData(formData) {
     const engAvg = ((engReading + engListening + engSpeaking + engWriting) / 4).toFixed(2);
     
     // 中文能力
-    const chnReading = parseInt(formData.get('chnReading')) || 0;
-    const chnListening = parseInt(formData.get('chnListening')) || 0;
-    const chnSpeaking = parseInt(formData.get('chnSpeaking')) || 0;
-    const chnWriting = parseInt(formData.get('chnWriting')) || 0;
-    let chnAvg = 0;
-    const chnScores = [chnReading, chnListening, chnSpeaking, chnWriting].filter(v => v > 0);
-    if (chnScores.length > 0) {
-        chnAvg = (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2);
+    const chnReading = formData.get('chnReading');
+    const chnListening = formData.get('chnListening');
+    const chnSpeaking = formData.get('chnSpeaking');
+    const chnWriting = formData.get('chnWriting');
+    let chnAvg = 'N/A';
+    if (chnReading !== 'na' && chnListening !== 'na') {
+        const chnScores = [chnReading, chnListening, chnSpeaking, chnWriting].filter(v => v !== 'na').map(v => parseInt(v));
+        if (chnScores.length > 0) {
+            chnAvg = (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2);
+        }
     }
     
     // 修過的課程
@@ -199,7 +201,7 @@ function collectFormData(formData) {
         // 語言能力
         engAvg: parseFloat(engAvg),
         engReading, engListening, engSpeaking, engWriting,
-        chnAvg: parseFloat(chnAvg) || 0,
+        chnAvg: chnAvg === 'N/A' ? chnAvg : parseFloat(chnAvg),
         
         // 先備知識
         courseCount,
@@ -626,17 +628,11 @@ function refreshAdminDisplay() {
     document.getElementById('femaleCount').textContent = cachedStudents.filter(s => s.gender === 'female').length;
     document.getElementById('intlCount').textContent = cachedStudents.filter(s => s.nationality !== 'taiwan').length;
     
-    // 計算詳細統計
-    if (cachedStudents.length > 0) {
-        updateDetailedStats();
-    }
-    
     const tbody = document.getElementById('studentTableBody');
     tbody.innerHTML = '';
     
     if (cachedStudents.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #7f8c8d;">目前沒有資料</td></tr>';
-        resetDetailedStats();
         return;
     }
     
@@ -658,82 +654,10 @@ function refreshAdminDisplay() {
     });
 }
 
-function updateDetailedStats() {
-    const n = cachedStudents.length;
-    if (n === 0) return;
-    
-    // 語言能力統計
-    const engScores = cachedStudents.map(s => parseFloat(s.engAvg) || 0).filter(v => v > 0);
-    const chnScores = cachedStudents.map(s => parseFloat(s.chnAvg) || 0).filter(v => v > 0);
-    document.getElementById('avgEngScore').textContent = engScores.length > 0 
-        ? (engScores.reduce((a, b) => a + b, 0) / engScores.length).toFixed(2) : '-';
-    document.getElementById('avgChnScore').textContent = chnScores.length > 0 
-        ? (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2) : '-';
-    
-    // 先備知識統計
-    const coursesCounts = cachedStudents.map(s => parseInt(s.courseCount) || 0);
-    const itScores = cachedStudents.map(s => parseFloat(s.itAvg) || 0);
-    const mgmtScores = cachedStudents.map(s => parseFloat(s.mgmtAvg) || 0);
-    document.getElementById('avgCourses').textContent = (coursesCounts.reduce((a, b) => a + b, 0) / n).toFixed(1) + ' 門';
-    document.getElementById('avgIT').textContent = (itScores.reduce((a, b) => a + b, 0) / n).toFixed(2);
-    document.getElementById('avgMgmt').textContent = (mgmtScores.reduce((a, b) => a + b, 0) / n).toFixed(2);
-    
-    // 學習動機統計
-    const intrinsicScores = cachedStudents.map(s => parseFloat(s.intrinsicMotivation) || 0);
-    const extrinsicScores = cachedStudents.map(s => parseFloat(s.extrinsicMotivation) || 0);
-    document.getElementById('avgIntrinsic').textContent = (intrinsicScores.reduce((a, b) => a + b, 0) / n).toFixed(2);
-    document.getElementById('avgExtrinsic').textContent = (extrinsicScores.reduce((a, b) => a + b, 0) / n).toFixed(2);
-    document.getElementById('countIntrinsic').textContent = cachedStudents.filter(s => s.motivationType === 'intrinsic').length + ' 人';
-    document.getElementById('countExtrinsic').textContent = cachedStudents.filter(s => s.motivationType === 'extrinsic').length + ' 人';
-    document.getElementById('countBalanced').textContent = cachedStudents.filter(s => s.motivationType === 'balanced').length + ' 人';
-    
-    // 自我效能統計
-    const efficacyScores = cachedStudents.map(s => parseFloat(s.selfEfficacy) || 0);
-    document.getElementById('avgEfficacy').textContent = (efficacyScores.reduce((a, b) => a + b, 0) / n).toFixed(2);
-    document.getElementById('highEfficacy').textContent = efficacyScores.filter(v => v >= 4).length + ' 人';
-    document.getElementById('medEfficacy').textContent = efficacyScores.filter(v => v >= 3 && v < 4).length + ' 人';
-    document.getElementById('lowEfficacy').textContent = efficacyScores.filter(v => v < 3).length + ' 人';
-    
-    // 團隊合作統計
-    const teamExpScores = cachedStudents.map(s => parseInt(s.teamExp) || 0);
-    document.getElementById('avgTeamExp').textContent = (teamExpScores.reduce((a, b) => a + b, 0) / n).toFixed(2);
-    document.getElementById('highTeamExp').textContent = teamExpScores.filter(v => v >= 4).length + ' 人';
-    document.getElementById('medTeamExp').textContent = teamExpScores.filter(v => v === 3).length + ' 人';
-    document.getElementById('lowTeamExp').textContent = teamExpScores.filter(v => v < 3).length + ' 人';
-    
-    // 最差學習經驗彙整
-    const worstExpList = document.getElementById('worstExpList');
-    const worstExps = cachedStudents.filter(s => s.worstExperience && s.worstExperience.trim() !== '');
-    
-    if (worstExps.length === 0) {
-        worstExpList.innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
-    } else {
-        worstExpList.innerHTML = worstExps.map(s => `
-            <div class="worst-exp-item">
-                <div class="student-info">${s.studentName} (${s.studentId})</div>
-                <div class="exp-content">${s.worstExperience}</div>
-            </div>
-        `).join('');
-    }
-}
-
-function resetDetailedStats() {
-    const ids = ['avgEngScore', 'avgChnScore', 'avgCourses', 'avgIT', 'avgMgmt', 
-                 'avgIntrinsic', 'avgExtrinsic', 'countIntrinsic', 'countExtrinsic', 'countBalanced',
-                 'avgEfficacy', 'highEfficacy', 'medEfficacy', 'lowEfficacy',
-                 'avgTeamExp', 'highTeamExp', 'medTeamExp', 'lowTeamExp'];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.textContent = '-';
-    });
-    document.getElementById('worstExpList').innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
-}
-
 // ==========================================
 // 分組功能
 // ==========================================
 document.getElementById('generateGroups').addEventListener('click', generateGroups);
-document.getElementById('downloadExcel').addEventListener('click', downloadExcel);
 document.getElementById('downloadReport').addEventListener('click', downloadReport);
 document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
 document.getElementById('refreshData').addEventListener('click', loadStudentData);
@@ -861,108 +785,6 @@ function downloadReport() {
     a.href = URL.createObjectURL(blob);
     a.download = `分組報告_${now.toISOString().split('T')[0]}.txt`;
     a.click();
-}
-
-function downloadExcel() {
-    const groups = JSON.parse(localStorage.getItem('groupingResults') || '[]');
-    if (groups.length === 0) {
-        alert('請先執行分組！');
-        return;
-    }
-    
-    // 建立 Excel XML 格式 (SpreadsheetML)
-    const now = new Date();
-    const motivationTypeNames = { intrinsic: '內在導向', extrinsic: '外在導向', balanced: '均衡型' };
-    
-    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <Styles>
-  <Style ss:ID="Header">
-   <Font ss:Bold="1" ss:Size="12"/>
-   <Interior ss:Color="#1e3a5f" ss:Pattern="Solid"/>
-   <Font ss:Color="#FFFFFF" ss:Bold="1"/>
-  </Style>
-  <Style ss:ID="GroupHeader">
-   <Font ss:Bold="1" ss:Size="11"/>
-   <Interior ss:Color="#e67e22" ss:Pattern="Solid"/>
-   <Font ss:Color="#FFFFFF"/>
-  </Style>
- </Styles>
- <Worksheet ss:Name="分組結果">
-  <Table>
-   <Column ss:Width="100"/>
-   <Column ss:Width="100"/>
-   <Column ss:Width="60"/>
-   <Column ss:Width="80"/>
-   <Column ss:Width="100"/>
-   <Row>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">學號 Student ID</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">姓名 Name</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">組別 Group</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">綜合分數 Score</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">動機類型 Motivation Type</Data></Cell>
-   </Row>`;
-    
-    groups.forEach((group, groupIndex) => {
-        group.forEach(s => {
-            const typeName = motivationTypeNames[s.motivationType] || s.motivationType || '-';
-            xmlContent += `
-   <Row>
-    <Cell><Data ss:Type="String">${escapeXml(s.studentId || '')}</Data></Cell>
-    <Cell><Data ss:Type="String">${escapeXml(s.studentName || '')}</Data></Cell>
-    <Cell><Data ss:Type="Number">${groupIndex + 1}</Data></Cell>
-    <Cell><Data ss:Type="Number">${s.compositeScore ? s.compositeScore.toFixed(2) : 0}</Data></Cell>
-    <Cell><Data ss:Type="String">${typeName}</Data></Cell>
-   </Row>`;
-        });
-    });
-    
-    xmlContent += `
-  </Table>
- </Worksheet>
- <Worksheet ss:Name="分組摘要">
-  <Table>
-   <Column ss:Width="80"/>
-   <Column ss:Width="60"/>
-   <Column ss:Width="200"/>
-   <Row>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">組別 Group</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">人數 Size</Data></Cell>
-    <Cell ss:StyleID="Header"><Data ss:Type="String">成員 Members</Data></Cell>
-   </Row>`;
-    
-    groups.forEach((group, i) => {
-        const members = group.map(s => s.studentName).join(', ');
-        xmlContent += `
-   <Row>
-    <Cell><Data ss:Type="String">第 ${i + 1} 組</Data></Cell>
-    <Cell><Data ss:Type="Number">${group.length}</Data></Cell>
-    <Cell><Data ss:Type="String">${escapeXml(members)}</Data></Cell>
-   </Row>`;
-    });
-    
-    xmlContent += `
-  </Table>
- </Worksheet>
-</Workbook>`;
-    
-    const blob = new Blob([xmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `分組結果_${now.toISOString().split('T')[0]}.xls`;
-    a.click();
-}
-
-function escapeXml(str) {
-    if (!str) return '';
-    return str.toString()
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
 }
 
 function downloadCSV() {
