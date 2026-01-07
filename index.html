@@ -256,33 +256,24 @@
                             <p class="section-desc">請勾選您曾修習過的相關課程（可複選）<br>Please check the related courses you have taken (multiple selections allowed)</p>
                             <div class="checkbox-group">
                                 <label class="checkbox-option">
-                                    <input type="checkbox" name="courses" value="intro_cs">
-                                    <span>計算機概論 Introduction to Computer Science</span>
+                                    <input type="checkbox" name="courses" value="management">
+                                    <span>管理學 Management</span>
                                 </label>
                                 <label class="checkbox-option">
-                                    <input type="checkbox" name="courses" value="intro_im">
-                                    <span>資訊管理導論 Introduction to Information Management</span>
+                                    <input type="checkbox" name="courses" value="intro_cs">
+                                    <span>計算機概論 Introduction to Computer Science</span>
                                 </label>
                                 <label class="checkbox-option">
                                     <input type="checkbox" name="courses" value="database">
                                     <span>資料庫管理 Database Management</span>
                                 </label>
                                 <label class="checkbox-option">
-                                    <input type="checkbox" name="courses" value="sa">
-                                    <span>系統分析與設計 System Analysis and Design</span>
+                                    <input type="checkbox" name="courses" value="crm">
+                                    <span>顧客關係管理 Customer Relationship Management</span>
                                 </label>
                                 <label class="checkbox-option">
                                     <input type="checkbox" name="courses" value="ecommerce">
                                     <span>電子商務 E-commerce</span>
-                                </label>
-                                <label class="checkbox-option">
-                                    <input type="checkbox" name="courses" value="erp">
-                                    <span>企業資源規劃 Enterprise Resource Planning (ERP)</span>
-                                </label>
-                                <label class="checkbox-option other-option">
-                                    <input type="checkbox" name="courses" value="other">
-                                    <span>其他 Other:</span>
-                                    <input type="text" name="coursesOther" class="inline-input" placeholder="Please specify 請說明">
                                 </label>
                                 <label class="checkbox-option">
                                     <input type="checkbox" name="courses" value="none" id="coursesNone">
@@ -954,6 +945,7 @@
                     <p>查看學生問卷資料並進行智慧分組</p>
                 </div>
 
+                <!-- 基本統計 -->
                 <div class="admin-stats">
                     <div class="stat-card">
                         <div class="stat-icon">👥</div>
@@ -985,6 +977,73 @@
                     </div>
                 </div>
 
+                <!-- 詳細統計區塊 -->
+                <div class="stats-detail-section">
+                    <h3>📊 詳細統計分析 Detailed Statistics</h3>
+                    <div class="stats-grid">
+                        <!-- 語言能力統計 -->
+                        <div class="stats-card">
+                            <h4>🌐 語言能力 Language Proficiency</h4>
+                            <div class="stats-content" id="langStats">
+                                <div class="stat-row"><span>英語平均 English Avg:</span><span id="avgEngScore">-</span></div>
+                                <div class="stat-row"><span>中文平均 Chinese Avg:</span><span id="avgChnScore">-</span></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 先備知識統計 -->
+                        <div class="stats-card">
+                            <h4>📚 先備知識 Prior Knowledge</h4>
+                            <div class="stats-content" id="knowledgeStats">
+                                <div class="stat-row"><span>修過課程平均 Avg Courses:</span><span id="avgCourses">-</span></div>
+                                <div class="stat-row"><span>IT能力平均 IT Skills Avg:</span><span id="avgIT">-</span></div>
+                                <div class="stat-row"><span>管理知識平均 Mgmt Avg:</span><span id="avgMgmt">-</span></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 學習動機統計 -->
+                        <div class="stats-card">
+                            <h4>🎯 學習動機 Learning Motivation</h4>
+                            <div class="stats-content" id="motivationStats">
+                                <div class="stat-row"><span>內在動機平均 Intrinsic Avg:</span><span id="avgIntrinsic">-</span></div>
+                                <div class="stat-row"><span>外在動機平均 Extrinsic Avg:</span><span id="avgExtrinsic">-</span></div>
+                                <div class="stat-row"><span>內在導向人數 Intrinsic Type:</span><span id="countIntrinsic">-</span></div>
+                                <div class="stat-row"><span>外在導向人數 Extrinsic Type:</span><span id="countExtrinsic">-</span></div>
+                                <div class="stat-row"><span>均衡型人數 Balanced Type:</span><span id="countBalanced">-</span></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 自我效能統計 -->
+                        <div class="stats-card">
+                            <h4>💪 自我效能 Self-Efficacy</h4>
+                            <div class="stats-content" id="efficacyStats">
+                                <div class="stat-row"><span>平均分數 Average:</span><span id="avgEfficacy">-</span></div>
+                                <div class="stat-row"><span>高效能 (≥4) High:</span><span id="highEfficacy">-</span></div>
+                                <div class="stat-row"><span>中效能 (3-4) Medium:</span><span id="medEfficacy">-</span></div>
+                                <div class="stat-row"><span>低效能 (<3) Low:</span><span id="lowEfficacy">-</span></div>
+                            </div>
+                        </div>
+                        
+                        <!-- 團隊合作統計 -->
+                        <div class="stats-card">
+                            <h4>👥 團隊合作 Teamwork</h4>
+                            <div class="stats-content" id="teamStats">
+                                <div class="stat-row"><span>經驗平均 Exp Avg:</span><span id="avgTeamExp">-</span></div>
+                                <div class="stat-row"><span>豐富經驗 (≥4) Extensive:</span><span id="highTeamExp">-</span></div>
+                                <div class="stat-row"><span>一般經驗 (3) Moderate:</span><span id="medTeamExp">-</span></div>
+                                <div class="stat-row"><span>有限經驗 (<3) Limited:</span><span id="lowTeamExp">-</span></div>
+                            </div>
+                        </div>
+
+                        <!-- 最差學習經驗彙整 -->
+                        <div class="stats-card wide">
+                            <h4>⚠️ 最差學習經驗彙整 Worst Learning Experiences Summary</h4>
+                            <div class="worst-exp-list" id="worstExpList">
+                                <p class="no-data">尚無資料 No data yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="admin-actions">
                     <div class="action-group">
                         <h3>分組設定</h3>
@@ -1010,6 +1069,9 @@
                     <div class="button-group">
                         <button id="generateGroups" class="btn btn-primary">
                             <span>🎲</span> 執行智慧分組
+                        </button>
+                        <button id="downloadExcel" class="btn btn-success">
+                            <span>📗</span> 下載分組 Excel
                         </button>
                         <button id="downloadReport" class="btn btn-secondary">
                             <span>📥</span> 下載分組報告
