@@ -4,7 +4,7 @@
 // ==========================================
 
 // ============ 設定 ============
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwaUmgG8rBGyue62jylhAPZVzCb48k0XEUxjrgtsx8SGR3b3Ko0jdaBQoWp9yAlmOSggQ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/gms.ndhu.edu.tw/s/AKfycbwNy5bsEM8mEK2YabK4KivwwB39FGKGzYElznYT3MzLNQEeAVZ_zlMyKNfTFDohskdraA/exec';
 const ADMIN_SESSION_KEY = 'adminLoggedIn';
 
 let cachedStudents = [];
