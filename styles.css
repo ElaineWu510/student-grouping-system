@@ -74,6 +74,7 @@ body {
 }
 .card-header h2 { font-size: 1.5rem; margin-bottom: 10px; }
 .card-subtitle { opacity: 0.9; font-size: 0.95rem; line-height: 1.6; }
+.card-subtitle .subtitle-en { display: block; margin-top: 10px; font-size: 0.9rem; opacity: 0.85; }
 
 /* Form Styles */
 .form { padding: 30px; }
