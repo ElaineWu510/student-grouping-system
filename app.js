@@ -4,7 +4,7 @@
 // ==========================================
 
 // ============ 設定 ============
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/gms.ndhu.edu.tw/s/AKfycbwNy5bsEM8mEK2YabK4KivwwB39FGKGzYElznYT3MzLNQEeAVZ_zlMyKNfTFDohskdraA/exec';
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
 const ADMIN_SESSION_KEY = 'adminLoggedIn';
 
 let cachedStudents = [];
@@ -121,16 +121,14 @@ function collectFormData(formData) {
     const engAvg = ((engReading + engListening + engSpeaking + engWriting) / 4).toFixed(2);
     
     // 中文能力
-    const chnReading = formData.get('chnReading');
-    const chnListening = formData.get('chnListening');
-    const chnSpeaking = formData.get('chnSpeaking');
-    const chnWriting = formData.get('chnWriting');
-    let chnAvg = 'N/A';
-    if (chnReading !== 'na' && chnListening !== 'na') {
-        const chnScores = [chnReading, chnListening, chnSpeaking, chnWriting].filter(v => v !== 'na').map(v => parseInt(v));
-        if (chnScores.length > 0) {
-            chnAvg = (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2);
-        }
+    const chnReading = parseInt(formData.get('chnReading')) || 0;
+    const chnListening = parseInt(formData.get('chnListening')) || 0;
+    const chnSpeaking = parseInt(formData.get('chnSpeaking')) || 0;
+    const chnWriting = parseInt(formData.get('chnWriting')) || 0;
+    let chnAvg = 0;
+    const chnScores = [chnReading, chnListening, chnSpeaking, chnWriting].filter(v => v > 0);
+    if (chnScores.length > 0) {
+        chnAvg = (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2);
     }
     
     // 修過的課程
@@ -201,7 +199,7 @@ function collectFormData(formData) {
         // 語言能力
         engAvg: parseFloat(engAvg),
         engReading, engListening, engSpeaking, engWriting,
-        chnAvg: chnAvg === 'N/A' ? chnAvg : parseFloat(chnAvg),
+        chnAvg: parseFloat(chnAvg) || 0,
         
         // 先備知識
         courseCount,
@@ -570,9 +568,19 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     submitBtn.innerHTML = '<span>驗證中...</span>';
     
     try {
+        // 離線測試模式：密碼為 elaine510510 即可登入
         if (GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
-            errorMsg.textContent = '系統尚未設定完成';
-            errorMsg.classList.remove('hidden');
+            if (password === 'elaine510510') {
+                setAdminLogin(true, password);
+                updateAdminUI();
+                document.getElementById('adminPassword').value = '';
+                errorMsg.classList.add('hidden');
+                alert('⚠️ 離線測試模式\n\nGoogle Script 尚未設定，目前為測試模式。\n請點擊「載入測試資料」來測試功能。');
+            } else {
+                errorMsg.textContent = '密碼錯誤';
+                errorMsg.classList.remove('hidden');
+                document.getElementById('adminPassword').value = '';
+            }
             return;
         }
         
@@ -628,11 +636,17 @@ function refreshAdminDisplay() {
     document.getElementById('femaleCount').textContent = cachedStudents.filter(s => s.gender === 'female').length;
     document.getElementById('intlCount').textContent = cachedStudents.filter(s => s.nationality !== 'taiwan').length;
     
+    // 計算詳細統計
+    if (cachedStudents.length > 0) {
+        updateDetailedStats();
+    }
+    
     const tbody = document.getElementById('studentTableBody');
     tbody.innerHTML = '';
     
     if (cachedStudents.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #7f8c8d;">目前沒有資料</td></tr>';
+        resetDetailedStats();
         return;
     }
     
@@ -654,13 +668,122 @@ function refreshAdminDisplay() {
     });
 }
 
+function updateDetailedStats() {
+    const n = cachedStudents.length;
+    if (n === 0) return;
+    
+    // 語言能力統計
+    const engScores = cachedStudents.map(s => parseFloat(s.engAvg) || 0).filter(v => v > 0);
+    const chnScores = cachedStudents.map(s => parseFloat(s.chnAvg) || 0).filter(v => v > 0);
+    document.getElementById('avgEngScore').textContent = engScores.length > 0 
+        ? (engScores.reduce((a, b) => a + b, 0) / engScores.length).toFixed(2) : '-';
+    document.getElementById('avgChnScore').textContent = chnScores.length > 0 
+        ? (chnScores.reduce((a, b) => a + b, 0) / chnScores.length).toFixed(2) : '-';
+    
+    // 先備知識統計 - 計算各課程修習人數
+    const courseNames = {
+        'management': '管理學 Management',
+        'intro_cs': '計算機概論 Intro to CS',
+        'database': '資料庫管理 Database',
+        'crm': '顧客關係管理 CRM',
+        'ecommerce': '電子商務 E-commerce'
+    };
+    const courseCounts = {};
+    Object.keys(courseNames).forEach(key => courseCounts[key] = 0);
+    
+    cachedStudents.forEach(s => {
+        if (s.courses) {
+            const courses = s.courses.split(',');
+            courses.forEach(c => {
+                if (courseCounts.hasOwnProperty(c)) {
+                    courseCounts[c]++;
+                }
+            });
+        }
+    });
+    
+    // 排序取前三名
+    const sortedCourses = Object.entries(courseCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+    
+    document.getElementById('topCourse1').textContent = sortedCourses[0] 
+        ? `${courseNames[sortedCourses[0][0]]} (${sortedCourses[0][1]}人)` : '-';
+    document.getElementById('topCourse2').textContent = sortedCourses[1] 
+        ? `${courseNames[sortedCourses[1][0]]} (${sortedCourses[1][1]}人)` : '-';
+    document.getElementById('topCourse3').textContent = sortedCourses[2] 
+        ? `${courseNames[sortedCourses[2][0]]} (${sortedCourses[2][1]}人)` : '-';
+    
+    // 最差學習經驗彙整
+    const worstExpList = document.getElementById('worstExpList');
+    const worstExps = cachedStudents.filter(s => s.worstExperience && s.worstExperience.trim() !== '');
+    
+    if (worstExps.length === 0) {
+        worstExpList.innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
+    } else {
+        worstExpList.innerHTML = worstExps.map(s => `
+            <div class="worst-exp-item">
+                <div class="student-info">${s.studentName} (${s.studentId})</div>
+                <div class="exp-content">${s.worstExperience}</div>
+            </div>
+        `).join('');
+    }
+    
+    // 特別需求彙整
+    const specialNeedsList = document.getElementById('specialNeedsList');
+    const specialNeeds = cachedStudents.filter(s => s.specialNeeds && s.specialNeeds.trim() !== '');
+    
+    if (specialNeeds.length === 0) {
+        specialNeedsList.innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
+    } else {
+        specialNeedsList.innerHTML = specialNeeds.map(s => `
+            <div class="worst-exp-item">
+                <div class="student-info">${s.studentName} (${s.studentId})</div>
+                <div class="exp-content">${s.specialNeeds}</div>
+            </div>
+        `).join('');
+    }
+}
+
+function resetDetailedStats() {
+    const ids = ['avgEngScore', 'avgChnScore', 'topCourse1', 'topCourse2', 'topCourse3'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '-';
+    });
+    document.getElementById('worstExpList').innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
+    document.getElementById('specialNeedsList').innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
+}
+
 // ==========================================
 // 分組功能
 // ==========================================
 document.getElementById('generateGroups').addEventListener('click', generateGroups);
+document.getElementById('downloadExcel').addEventListener('click', downloadExcel);
 document.getElementById('downloadReport').addEventListener('click', downloadReport);
 document.getElementById('downloadCSV').addEventListener('click', downloadCSV);
 document.getElementById('refreshData').addEventListener('click', loadStudentData);
+document.getElementById('loadTestData').addEventListener('click', loadTestData);
+
+// 載入測試資料
+function loadTestData() {
+    const testStudents = [
+        { studentId: '411012001', studentName: '王小明', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.5, chnAvg: 5, courses: 'management,intro_cs,database', courseCount: 3, itAvg: 4.2, mgmtAvg: 3.8, priorKnowledge: 5.5, intrinsicMotivation: 4.2, extrinsicMotivation: 3.5, motivationType: 'intrinsic', selfEfficacy: 4.1, teamExp: 4, teamRoles: 'leader,analyzer', worstExperience: '老師上課太快，跟不上進度', specialNeeds: '' },
+        { studentId: '411012002', studentName: '李小華', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 4.2, chnAvg: 5, courses: 'management,ecommerce', courseCount: 2, itAvg: 3.5, mgmtAvg: 4.0, priorKnowledge: 4.8, intrinsicMotivation: 3.8, extrinsicMotivation: 4.5, motivationType: 'extrinsic', selfEfficacy: 3.8, teamExp: 3, teamRoles: 'presenter,facilitator', worstExperience: '分組報告時組員不配合', specialNeeds: '希望能有更多實作練習' },
+        { studentId: '411012003', studentName: 'John Smith', gender: 'male', nationality: 'other', nativeLanguage: 'english', engAvg: 5, chnAvg: 2.5, courses: 'intro_cs', courseCount: 1, itAvg: 4.8, mgmtAvg: 2.5, priorKnowledge: 3.2, intrinsicMotivation: 4.5, extrinsicMotivation: 3.2, motivationType: 'intrinsic', selfEfficacy: 4.5, teamExp: 5, teamRoles: 'ideator,implementer', worstExperience: 'Language barrier in group discussions', specialNeeds: 'Need English materials' },
+        { studentId: '411012004', studentName: '張美玲', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.8, chnAvg: 5, courses: 'management,database,crm', courseCount: 3, itAvg: 3.2, mgmtAvg: 4.5, priorKnowledge: 5.8, intrinsicMotivation: 4.0, extrinsicMotivation: 4.0, motivationType: 'balanced', selfEfficacy: 3.5, teamExp: 4, teamRoles: 'researcher,analyzer', worstExperience: '考試範圍太大，準備不及', specialNeeds: '' },
+        { studentId: '411012005', studentName: '陳大偉', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 2.8, chnAvg: 5, courses: 'intro_cs,ecommerce', courseCount: 2, itAvg: 4.5, mgmtAvg: 3.0, priorKnowledge: 4.2, intrinsicMotivation: 3.5, extrinsicMotivation: 4.8, motivationType: 'extrinsic', selfEfficacy: 3.2, teamExp: 2, teamRoles: 'implementer', worstExperience: '作業太多，時間不夠用', specialNeeds: '有打工，希望作業彈性繳交' },
+        { studentId: '411012006', studentName: 'Maria Garcia', gender: 'female', nationality: 'other', nativeLanguage: 'other', engAvg: 4.5, chnAvg: 1.8, courses: 'management', courseCount: 1, itAvg: 3.8, mgmtAvg: 4.2, priorKnowledge: 3.5, intrinsicMotivation: 4.8, extrinsicMotivation: 3.0, motivationType: 'intrinsic', selfEfficacy: 4.2, teamExp: 4, teamRoles: 'leader,presenter', worstExperience: 'Too much theory, not enough practice', specialNeeds: 'Need Chinese language support' },
+        { studentId: '411012007', studentName: '林志豪', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.2, chnAvg: 5, courses: 'database,crm,ecommerce', courseCount: 3, itAvg: 4.0, mgmtAvg: 3.5, priorKnowledge: 5.2, intrinsicMotivation: 3.2, extrinsicMotivation: 4.2, motivationType: 'extrinsic', selfEfficacy: 3.8, teamExp: 3, teamRoles: 'researcher', worstExperience: '老師不給問問題的機會', specialNeeds: '' },
+        { studentId: '411012008', studentName: '黃雅琪', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 4.0, chnAvg: 5, courses: 'management,intro_cs', courseCount: 2, itAvg: 3.0, mgmtAvg: 4.8, priorKnowledge: 4.5, intrinsicMotivation: 4.5, extrinsicMotivation: 3.8, motivationType: 'intrinsic', selfEfficacy: 4.0, teamExp: 5, teamRoles: 'facilitator,presenter', worstExperience: '缺乏互動，只有單向講課', specialNeeds: '' },
+        { studentId: '411012009', studentName: '吳建宏', gender: 'male', nationality: 'hongkong', nativeLanguage: 'chinese', engAvg: 4.2, chnAvg: 4.8, courses: 'intro_cs,database', courseCount: 2, itAvg: 4.5, mgmtAvg: 3.2, priorKnowledge: 4.8, intrinsicMotivation: 4.0, extrinsicMotivation: 4.0, motivationType: 'balanced', selfEfficacy: 4.3, teamExp: 4, teamRoles: 'analyzer,implementer', worstExperience: '課程內容與實務脫節', specialNeeds: '' },
+        { studentId: '411012010', studentName: '周佳蓉', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.5, chnAvg: 5, courses: 'management,crm', courseCount: 2, itAvg: 2.8, mgmtAvg: 4.0, priorKnowledge: 4.0, intrinsicMotivation: 3.8, extrinsicMotivation: 4.5, motivationType: 'extrinsic', selfEfficacy: 3.0, teamExp: 3, teamRoles: 'researcher,facilitator', worstExperience: '評分標準不清楚', specialNeeds: '視力不好，希望座位前排' }
+    ];
+    
+    cachedStudents = testStudents;
+    refreshAdminDisplay();
+    alert('已載入 10 筆測試資料！\n\n請點擊「執行智慧分組」進行分組，\n然後即可下載 Excel 報告。');
+}
 
 function generateGroups() {
     if (cachedStudents.length === 0) {
@@ -785,6 +908,130 @@ function downloadReport() {
     a.href = URL.createObjectURL(blob);
     a.download = `分組報告_${now.toISOString().split('T')[0]}.txt`;
     a.click();
+}
+
+function downloadExcel() {
+    const groups = JSON.parse(localStorage.getItem('groupingResults') || '[]');
+    if (groups.length === 0) {
+        alert('請先執行分組！');
+        return;
+    }
+    
+    // 建立 Excel XML 格式 (SpreadsheetML)
+    const now = new Date();
+    const motivationTypeNames = { intrinsic: '內在導向', extrinsic: '外在導向', balanced: '均衡型' };
+    
+    let xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <Styles>
+  <Style ss:ID="Header">
+   <Font ss:Bold="1" ss:Size="12"/>
+   <Interior ss:Color="#1e3a5f" ss:Pattern="Solid"/>
+   <Font ss:Color="#FFFFFF" ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="Wrap">
+   <Alignment ss:WrapText="1" ss:Vertical="Top"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="分組結果">
+  <Table>
+   <Column ss:Width="80"/>
+   <Column ss:Width="80"/>
+   <Column ss:Width="50"/>
+   <Column ss:Width="70"/>
+   <Column ss:Width="100"/>
+   <Column ss:Width="120"/>
+   <Column ss:Width="80"/>
+   <Column ss:Width="70"/>
+   <Column ss:Width="200"/>
+   <Column ss:Width="200"/>
+   <Row>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">學號</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">姓名</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">組別</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">綜合分數</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">語言能力</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">先備知識</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">學習動機</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">自我效能</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">最差的學習經驗</Data></Cell>
+    <Cell ss:StyleID="Header"><Data ss:Type="String">對本課程的特別需求</Data></Cell>
+   </Row>`;
+    
+    groups.forEach((group, groupIndex) => {
+        group.forEach(s => {
+            // 語言能力：英文 X.X / 中文 X.X
+            const langStr = `英文 ${s.engAvg || '-'} / 中文 ${s.chnAvg || '-'}`;
+            
+            // 先備知識：修過的課程
+            const courseNames = {
+                'management': '管理學',
+                'intro_cs': '計算機概論',
+                'database': '資料庫管理',
+                'crm': '顧客關係管理',
+                'ecommerce': '電子商務',
+                'none': '無'
+            };
+            let priorStr = '-';
+            if (s.courses) {
+                const courseList = s.courses.split(',').filter(c => c && c !== 'none');
+                if (courseList.length > 0) {
+                    priorStr = courseList.map(c => courseNames[c] || c).join('、');
+                } else {
+                    priorStr = '無';
+                }
+            }
+            
+            // 學習動機類型
+            const motivationType = motivationTypeNames[s.motivationType] || s.motivationType || '-';
+            
+            // 自我效能分數
+            const efficacyStr = s.selfEfficacy ? parseFloat(s.selfEfficacy).toFixed(1) : '-';
+            
+            // 最差學習經驗
+            const worstExp = s.worstExperience || '';
+            
+            // 特別需求
+            const specialNeeds = s.specialNeeds || '';
+            
+            xmlContent += `
+   <Row ss:Height="45">
+    <Cell><Data ss:Type="String">${escapeXml(s.studentId || '')}</Data></Cell>
+    <Cell><Data ss:Type="String">${escapeXml(s.studentName || '')}</Data></Cell>
+    <Cell><Data ss:Type="Number">${groupIndex + 1}</Data></Cell>
+    <Cell><Data ss:Type="Number">${s.compositeScore ? s.compositeScore.toFixed(2) : 0}</Data></Cell>
+    <Cell><Data ss:Type="String">${escapeXml(langStr)}</Data></Cell>
+    <Cell ss:StyleID="Wrap"><Data ss:Type="String">${escapeXml(priorStr)}</Data></Cell>
+    <Cell><Data ss:Type="String">${escapeXml(motivationType)}</Data></Cell>
+    <Cell><Data ss:Type="String">${escapeXml(efficacyStr)}</Data></Cell>
+    <Cell ss:StyleID="Wrap"><Data ss:Type="String">${escapeXml(worstExp)}</Data></Cell>
+    <Cell ss:StyleID="Wrap"><Data ss:Type="String">${escapeXml(specialNeeds)}</Data></Cell>
+   </Row>`;
+        });
+    });
+    
+    xmlContent += `
+  </Table>
+ </Worksheet>
+</Workbook>`;
+    
+    const blob = new Blob([xmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `分組報告_${now.toISOString().split('T')[0]}.xls`;
+    a.click();
+}
+
+function escapeXml(str) {
+    if (!str) return '';
+    return str.toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
 }
 
 function downloadCSV() {
