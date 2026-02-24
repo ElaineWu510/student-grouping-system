@@ -426,16 +426,19 @@ async function submitToGoogleSheets(studentData) {
 function validateForm() {
     clearAllErrors();
     
+    // morning.html / afternoon.html 設有 window.CLASS_SECTION；index.html 則無
+    const isClassPage = !!window.CLASS_SECTION;
+
     const requiredFields = [
         { name: 'studentId', label: '學號' },
         { name: 'studentName', label: '姓名' },
-        // Email：僅在新版頁面（morning/afternoon）才驗證
-        ...(document.querySelector('[name="email"]') ? [{ name: 'email', label: 'Email' }] : []),
-        // 班級：僅在 index.html（未預設班級）才驗證
-        ...(window.CLASS_SECTION ? [] : [{ name: 'classSection', label: '上課班級', type: 'radio' }]),
+        // 新版頁面驗證 Email；舊版 index.html 驗證班別
+        ...(isClassPage
+            ? [{ name: 'email', label: 'Email' }]
+            : [{ name: 'classSection', label: '上課班級', type: 'radio' }]),
         { name: 'gender', label: '性別', type: 'radio' },
-        // 國籍：僅在 index.html 才驗證
-        ...(document.querySelector('[name="nationality"]') ? [{ name: 'nationality', label: '國籍', type: 'radio' }] : []),
+        // 舊版 index.html 才驗證國籍
+        ...(isClassPage ? [] : [{ name: 'nationality', label: '國籍', type: 'radio' }]),
         { name: 'nativeLanguage', label: '母語', type: 'radio' },
         { name: 'engReading', label: '英語閱讀能力', type: 'radio' },
         { name: 'engListening', label: '英語聽力能力', type: 'radio' },
@@ -669,23 +672,27 @@ function refreshAdminDisplay() {
         ? cachedStudents 
         : cachedStudents.filter(s => s.classSection === filter);
     
-    // 統計總人數（全部）
-    document.getElementById('totalStudents').textContent = cachedStudents.length;
-    document.getElementById('maleCount').textContent = cachedStudents.filter(s => s.gender === 'male').length;
-    document.getElementById('femaleCount').textContent = cachedStudents.filter(s => s.gender === 'female').length;
-    document.getElementById('intlCount').textContent = cachedStudents.filter(s => s.nativeLanguage && s.nativeLanguage !== 'chinese').length;
-    
-    // 計算詳細統計
-    if (cachedStudents.length > 0) {
-        updateDetailedStats();
+    // 統計：依所在頁面班別篩選（morning/afternoon），index.html 則顯示全部
+    const statsStudents = window.CLASS_SECTION
+        ? cachedStudents.filter(s => s.classSection === window.CLASS_SECTION)
+        : cachedStudents;
+
+    document.getElementById('totalStudents').textContent = statsStudents.length;
+    document.getElementById('maleCount').textContent = statsStudents.filter(s => s.gender === 'male').length;
+    document.getElementById('femaleCount').textContent = statsStudents.filter(s => s.gender === 'female').length;
+    document.getElementById('intlCount').textContent = statsStudents.filter(s => s.nativeLanguage && s.nativeLanguage !== 'chinese').length;
+
+    // 計算詳細統計（依班別篩選）
+    if (statsStudents.length > 0) {
+        updateDetailedStats(statsStudents);
     }
-    
+
     const tbody = document.getElementById('studentTableBody');
     tbody.innerHTML = '';
-    
+
     if (filteredStudents.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #7f8c8d;">目前沒有資料</td></tr>';
-        if (cachedStudents.length === 0) resetDetailedStats();
+        if (statsStudents.length === 0) resetDetailedStats();
         return;
     }
     
@@ -747,13 +754,14 @@ async function deleteStudent(studentId) {
     }
 }
 
-function updateDetailedStats() {
-    const n = cachedStudents.length;
+function updateDetailedStats(students) {
+    students = students || cachedStudents;
+    const n = students.length;
     if (n === 0) return;
-    
+
     // 語言能力統計
-    const engScores = cachedStudents.map(s => parseFloat(s.engAvg) || 0).filter(v => v > 0);
-    const chnScores = cachedStudents.map(s => parseFloat(s.chnAvg) || 0).filter(v => v > 0);
+    const engScores = students.map(s => parseFloat(s.engAvg) || 0).filter(v => v > 0);
+    const chnScores = students.map(s => parseFloat(s.chnAvg) || 0).filter(v => v > 0);
     document.getElementById('avgEngScore').textContent = engScores.length > 0 
         ? (engScores.reduce((a, b) => a + b, 0) / engScores.length).toFixed(2) : '-';
     document.getElementById('avgChnScore').textContent = chnScores.length > 0 
@@ -770,7 +778,7 @@ function updateDetailedStats() {
     const courseCounts = {};
     Object.keys(courseNames).forEach(key => courseCounts[key] = 0);
     
-    cachedStudents.forEach(s => {
+    students.forEach(s => {
         if (s.courses) {
             const courses = s.courses.split(',');
             courses.forEach(c => {
@@ -795,7 +803,7 @@ function updateDetailedStats() {
     
     // 最差學習經驗彙整
     const worstExpList = document.getElementById('worstExpList');
-    const worstExps = cachedStudents.filter(s => s.worstExperience && s.worstExperience.trim() !== '');
+    const worstExps = students.filter(s => s.worstExperience && s.worstExperience.trim() !== '');
     
     if (worstExps.length === 0) {
         worstExpList.innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
@@ -810,7 +818,7 @@ function updateDetailedStats() {
     
     // 特別需求彙整
     const specialNeedsList = document.getElementById('specialNeedsList');
-    const specialNeeds = cachedStudents.filter(s => s.specialNeeds && s.specialNeeds.trim() !== '');
+    const specialNeeds = students.filter(s => s.specialNeeds && s.specialNeeds.trim() !== '');
     
     if (specialNeeds.length === 0) {
         specialNeedsList.innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
