@@ -64,6 +64,28 @@
                         </div>
 
                         <div class="form-row">
+                            <div class="form-group full-width">
+                                <label>上課班級 Class Section <span class="required">*</span></label>
+                                <div class="radio-group class-selection">
+                                    <label class="radio-option class-option">
+                                        <input type="radio" name="classSection" value="morning_english" required>
+                                        <div class="class-info">
+                                            <span class="class-time">🌅 09:00 - 12:00</span>
+                                            <span class="class-lang">全英語授課 English-taught Class</span>
+                                        </div>
+                                    </label>
+                                    <label class="radio-option class-option">
+                                        <input type="radio" name="classSection" value="afternoon_chinese">
+                                        <div class="class-info">
+                                            <span class="class-time">🌇 14:00 - 17:00</span>
+                                            <span class="class-lang">中文授課 Chinese-taught Class</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>性別 Gender <span class="required">*</span></label>
                                 <div class="radio-group horizontal">
@@ -1026,11 +1048,10 @@
                         <h3>分組設定</h3>
                         <div class="settings-row">
                             <label>
-                                每組人數：
-                                <select id="groupSize">
-                                    <option value="4">4人</option>
-                                    <option value="5" selected>5人</option>
-                                    <option value="6">6人</option>
+                                分組班級：
+                                <select id="classFilter">
+                                    <option value="morning_english">早上班 (全英語)</option>
+                                    <option value="afternoon_chinese">下午班 (中文)</option>
                                 </select>
                             </label>
                             <label>
@@ -1041,6 +1062,7 @@
                                 </select>
                             </label>
                         </div>
+                        <p class="settings-note">⚠️ 每班固定分為 10 組</p>
                     </div>
 
                     <div class="button-group">
@@ -1060,11 +1082,23 @@
                 </div>
 
                 <div class="data-section">
-                    <h3>學生問卷資料</h3>
+                    <div class="data-header">
+                        <h3>學生問卷資料</h3>
+                        <div class="data-filter">
+                            <label>顯示班級：
+                                <select id="tableClassFilter">
+                                    <option value="all">全部</option>
+                                    <option value="morning_english">早上班 (全英語)</option>
+                                    <option value="afternoon_chinese">下午班 (中文)</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
                     <div class="table-container">
                         <table id="studentTable">
                             <thead>
                                 <tr>
+                                    <th>班級</th>
                                     <th>學號</th>
                                     <th>姓名</th>
                                     <th>性別</th>
@@ -1073,7 +1107,7 @@
                                     <th>IT能力</th>
                                     <th>動機類型</th>
                                     <th>自我效能</th>
-                                    <th>團隊經驗</th>
+                                    <th>操作</th>
                                 </tr>
                             </thead>
                             <tbody id="studentTableBody">
