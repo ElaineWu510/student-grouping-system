@@ -4,7 +4,7 @@
 // ==========================================
 
 // ============ 設定 ============
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4020q1vG4KeWZ0ntnxfiFYb2vx8N7qB3KCMqowSlk9a1OqKl7_1wcrPJbRQE199IrgA/exec';
+const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
 const ADMIN_SESSION_KEY = 'adminLoggedIn';
 
 let cachedStudents = [];
@@ -124,6 +124,7 @@ function collectFormData(formData) {
     // 基本資料
     const studentId = formData.get('studentId');
     const studentName = formData.get('studentName');
+    const classSection = formData.get('classSection');
     const gender = formData.get('gender');
     const nationality = formData.get('nationality') === 'other' ? formData.get('nationalityOther') : formData.get('nationality');
     const nativeLanguage = formData.get('nativeLanguage') === 'other' ? formData.get('nativeLanguageOther') : formData.get('nativeLanguage');
@@ -207,6 +208,7 @@ function collectFormData(formData) {
         // 基本資料
         studentId,
         studentName,
+        classSection,
         gender,
         nationality,
         nativeLanguage,
@@ -423,6 +425,7 @@ function validateForm() {
     const requiredFields = [
         { name: 'studentId', label: '學號' },
         { name: 'studentName', label: '姓名' },
+        { name: 'classSection', label: '上課班級', type: 'radio' },
         { name: 'gender', label: '性別', type: 'radio' },
         { name: 'nationality', label: '國籍', type: 'radio' },
         { name: 'nativeLanguage', label: '母語', type: 'radio' },
@@ -646,6 +649,12 @@ async function loadStudentData() {
 }
 
 function refreshAdminDisplay() {
+    const filter = document.getElementById('tableClassFilter')?.value || 'all';
+    const filteredStudents = filter === 'all' 
+        ? cachedStudents 
+        : cachedStudents.filter(s => s.classSection === filter);
+    
+    // 統計總人數（全部）
     document.getElementById('totalStudents').textContent = cachedStudents.length;
     document.getElementById('maleCount').textContent = cachedStudents.filter(s => s.gender === 'male').length;
     document.getElementById('femaleCount').textContent = cachedStudents.filter(s => s.gender === 'female').length;
@@ -659,16 +668,22 @@ function refreshAdminDisplay() {
     const tbody = document.getElementById('studentTableBody');
     tbody.innerHTML = '';
     
-    if (cachedStudents.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #7f8c8d;">目前沒有資料</td></tr>';
-        resetDetailedStats();
+    if (filteredStudents.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #7f8c8d;">目前沒有資料</td></tr>';
+        if (cachedStudents.length === 0) resetDetailedStats();
         return;
     }
     
-    cachedStudents.forEach(s => {
+    const classNames = {
+        'morning_english': '早上(英)',
+        'afternoon_chinese': '下午(中)'
+    };
+    
+    filteredStudents.forEach(s => {
         const row = document.createElement('tr');
         const motivationTypes = { intrinsic: '內在', extrinsic: '外在', balanced: '均衡' };
         row.innerHTML = `
+            <td>${classNames[s.classSection] || '-'}</td>
             <td>${s.studentId || '-'}</td>
             <td>${s.studentName || '-'}</td>
             <td>${s.gender === 'male' ? '男' : s.gender === 'female' ? '女' : '-'}</td>
@@ -677,10 +692,44 @@ function refreshAdminDisplay() {
             <td>${s.itAvg || '-'}</td>
             <td>${motivationTypes[s.motivationType] || '-'}</td>
             <td>${s.selfEfficacy || '-'}</td>
-            <td>${s.teamExp || '-'}</td>
+            <td><button class="btn btn-danger" onclick="deleteStudent('${s.studentId}')">🗑️ 刪除</button></td>
         `;
         tbody.appendChild(row);
     });
+}
+
+// 監聽表格篩選變更
+document.getElementById('tableClassFilter')?.addEventListener('change', refreshAdminDisplay);
+
+// 刪除學生功能
+async function deleteStudent(studentId) {
+    if (!confirm(`確定要刪除學號 ${studentId} 的資料嗎？\n此操作無法復原！`)) {
+        return;
+    }
+    
+    try {
+        if (GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_SCRIPT_URL_HERE') {
+            // 呼叫 API 刪除
+            const result = await apiRequest('delete_student', { 
+                password: adminPassword, 
+                studentId: studentId 
+            });
+            
+            if (!result.success) {
+                alert('刪除失敗：' + (result.error || '未知錯誤'));
+                return;
+            }
+        }
+        
+        // 從本地快取中移除
+        cachedStudents = cachedStudents.filter(s => s.studentId !== studentId);
+        refreshAdminDisplay();
+        alert('已成功刪除！');
+        
+    } catch (error) {
+        console.error('Delete error:', error);
+        alert('刪除失敗，請稍後再試');
+    }
 }
 
 function updateDetailedStats() {
@@ -783,40 +832,53 @@ document.getElementById('loadTestData').addEventListener('click', loadTestData);
 // 載入測試資料
 function loadTestData() {
     const testStudents = [
-        { studentId: '411012001', studentName: '王小明', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.5, chnAvg: 5, courses: 'management,intro_cs,database', courseCount: 3, itAvg: 4.2, mgmtAvg: 3.8, priorKnowledge: 5.5, intrinsicMotivation: 4.2, extrinsicMotivation: 3.5, motivationType: 'intrinsic', selfEfficacy: 4.1, teamExp: 4, teamRoles: 'leader,analyzer', worstExperience: '老師上課太快，跟不上進度', specialNeeds: '' },
-        { studentId: '411012002', studentName: '李小華', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 4.2, chnAvg: 5, courses: 'management,ecommerce', courseCount: 2, itAvg: 3.5, mgmtAvg: 4.0, priorKnowledge: 4.8, intrinsicMotivation: 3.8, extrinsicMotivation: 4.5, motivationType: 'extrinsic', selfEfficacy: 3.8, teamExp: 3, teamRoles: 'presenter,facilitator', worstExperience: '分組報告時組員不配合', specialNeeds: '希望能有更多實作練習' },
-        { studentId: '411012003', studentName: 'John Smith', gender: 'male', nationality: 'other', nativeLanguage: 'english', engAvg: 5, chnAvg: 2.5, courses: 'intro_cs', courseCount: 1, itAvg: 4.8, mgmtAvg: 2.5, priorKnowledge: 3.2, intrinsicMotivation: 4.5, extrinsicMotivation: 3.2, motivationType: 'intrinsic', selfEfficacy: 4.5, teamExp: 5, teamRoles: 'ideator,implementer', worstExperience: 'Language barrier in group discussions', specialNeeds: 'Need English materials' },
-        { studentId: '411012004', studentName: '張美玲', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.8, chnAvg: 5, courses: 'management,database,crm', courseCount: 3, itAvg: 3.2, mgmtAvg: 4.5, priorKnowledge: 5.8, intrinsicMotivation: 4.0, extrinsicMotivation: 4.0, motivationType: 'balanced', selfEfficacy: 3.5, teamExp: 4, teamRoles: 'researcher,analyzer', worstExperience: '考試範圍太大，準備不及', specialNeeds: '' },
-        { studentId: '411012005', studentName: '陳大偉', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 2.8, chnAvg: 5, courses: 'intro_cs,ecommerce', courseCount: 2, itAvg: 4.5, mgmtAvg: 3.0, priorKnowledge: 4.2, intrinsicMotivation: 3.5, extrinsicMotivation: 4.8, motivationType: 'extrinsic', selfEfficacy: 3.2, teamExp: 2, teamRoles: 'implementer', worstExperience: '作業太多，時間不夠用', specialNeeds: '有打工，希望作業彈性繳交' },
-        { studentId: '411012006', studentName: 'Maria Garcia', gender: 'female', nationality: 'other', nativeLanguage: 'other', engAvg: 4.5, chnAvg: 1.8, courses: 'management', courseCount: 1, itAvg: 3.8, mgmtAvg: 4.2, priorKnowledge: 3.5, intrinsicMotivation: 4.8, extrinsicMotivation: 3.0, motivationType: 'intrinsic', selfEfficacy: 4.2, teamExp: 4, teamRoles: 'leader,presenter', worstExperience: 'Too much theory, not enough practice', specialNeeds: 'Need Chinese language support' },
-        { studentId: '411012007', studentName: '林志豪', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.2, chnAvg: 5, courses: 'database,crm,ecommerce', courseCount: 3, itAvg: 4.0, mgmtAvg: 3.5, priorKnowledge: 5.2, intrinsicMotivation: 3.2, extrinsicMotivation: 4.2, motivationType: 'extrinsic', selfEfficacy: 3.8, teamExp: 3, teamRoles: 'researcher', worstExperience: '老師不給問問題的機會', specialNeeds: '' },
-        { studentId: '411012008', studentName: '黃雅琪', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 4.0, chnAvg: 5, courses: 'management,intro_cs', courseCount: 2, itAvg: 3.0, mgmtAvg: 4.8, priorKnowledge: 4.5, intrinsicMotivation: 4.5, extrinsicMotivation: 3.8, motivationType: 'intrinsic', selfEfficacy: 4.0, teamExp: 5, teamRoles: 'facilitator,presenter', worstExperience: '缺乏互動，只有單向講課', specialNeeds: '' },
-        { studentId: '411012009', studentName: '吳建宏', gender: 'male', nationality: 'hongkong', nativeLanguage: 'chinese', engAvg: 4.2, chnAvg: 4.8, courses: 'intro_cs,database', courseCount: 2, itAvg: 4.5, mgmtAvg: 3.2, priorKnowledge: 4.8, intrinsicMotivation: 4.0, extrinsicMotivation: 4.0, motivationType: 'balanced', selfEfficacy: 4.3, teamExp: 4, teamRoles: 'analyzer,implementer', worstExperience: '課程內容與實務脫節', specialNeeds: '' },
-        { studentId: '411012010', studentName: '周佳蓉', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.5, chnAvg: 5, courses: 'management,crm', courseCount: 2, itAvg: 2.8, mgmtAvg: 4.0, priorKnowledge: 4.0, intrinsicMotivation: 3.8, extrinsicMotivation: 4.5, motivationType: 'extrinsic', selfEfficacy: 3.0, teamExp: 3, teamRoles: 'researcher,facilitator', worstExperience: '評分標準不清楚', specialNeeds: '視力不好，希望座位前排' }
+        // 早上班（全英語）
+        { studentId: '411012001', studentName: '王小明', classSection: 'morning_english', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 4.5, chnAvg: 5, courses: 'management,intro_cs,database', courseCount: 3, itAvg: 4.2, mgmtAvg: 3.8, priorKnowledge: 5.5, intrinsicMotivation: 4.2, extrinsicMotivation: 3.5, motivationType: 'intrinsic', selfEfficacy: 4.1, teamExp: 4, teamRoles: 'leader,analyzer', worstExperience: '老師上課太快，跟不上進度', specialNeeds: '' },
+        { studentId: '411012002', studentName: '李小華', classSection: 'morning_english', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 4.2, chnAvg: 5, courses: 'management,ecommerce', courseCount: 2, itAvg: 3.5, mgmtAvg: 4.0, priorKnowledge: 4.8, intrinsicMotivation: 3.8, extrinsicMotivation: 4.5, motivationType: 'extrinsic', selfEfficacy: 3.8, teamExp: 3, teamRoles: 'presenter,facilitator', worstExperience: '分組報告時組員不配合', specialNeeds: '希望能有更多實作練習' },
+        { studentId: '411012003', studentName: 'John Smith', classSection: 'morning_english', gender: 'male', nationality: 'other', nativeLanguage: 'english', engAvg: 5, chnAvg: 2.5, courses: 'intro_cs', courseCount: 1, itAvg: 4.8, mgmtAvg: 2.5, priorKnowledge: 3.2, intrinsicMotivation: 4.5, extrinsicMotivation: 3.2, motivationType: 'intrinsic', selfEfficacy: 4.5, teamExp: 5, teamRoles: 'ideator,implementer', worstExperience: 'Language barrier in group discussions', specialNeeds: 'Need English materials' },
+        { studentId: '411012004', studentName: '張美玲', classSection: 'morning_english', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 4.8, chnAvg: 5, courses: 'management,database,crm', courseCount: 3, itAvg: 3.2, mgmtAvg: 4.5, priorKnowledge: 5.8, intrinsicMotivation: 4.0, extrinsicMotivation: 4.0, motivationType: 'balanced', selfEfficacy: 3.5, teamExp: 4, teamRoles: 'researcher,analyzer', worstExperience: '考試範圍太大，準備不及', specialNeeds: '' },
+        { studentId: '411012005', studentName: 'Maria Garcia', classSection: 'morning_english', gender: 'female', nationality: 'other', nativeLanguage: 'other', engAvg: 4.5, chnAvg: 1.8, courses: 'management', courseCount: 1, itAvg: 3.8, mgmtAvg: 4.2, priorKnowledge: 3.5, intrinsicMotivation: 4.8, extrinsicMotivation: 3.0, motivationType: 'intrinsic', selfEfficacy: 4.2, teamExp: 4, teamRoles: 'leader,presenter', worstExperience: 'Too much theory, not enough practice', specialNeeds: 'Need Chinese language support' },
+        
+        // 下午班（中文）
+        { studentId: '411012006', studentName: '陳大偉', classSection: 'afternoon_chinese', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 2.8, chnAvg: 5, courses: 'intro_cs,ecommerce', courseCount: 2, itAvg: 4.5, mgmtAvg: 3.0, priorKnowledge: 4.2, intrinsicMotivation: 3.5, extrinsicMotivation: 4.8, motivationType: 'extrinsic', selfEfficacy: 3.2, teamExp: 2, teamRoles: 'implementer', worstExperience: '作業太多，時間不夠用', specialNeeds: '有打工，希望作業彈性繳交' },
+        { studentId: '411012007', studentName: '林志豪', classSection: 'afternoon_chinese', gender: 'male', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.2, chnAvg: 5, courses: 'database,crm,ecommerce', courseCount: 3, itAvg: 4.0, mgmtAvg: 3.5, priorKnowledge: 5.2, intrinsicMotivation: 3.2, extrinsicMotivation: 4.2, motivationType: 'extrinsic', selfEfficacy: 3.8, teamExp: 3, teamRoles: 'researcher', worstExperience: '老師不給問問題的機會', specialNeeds: '' },
+        { studentId: '411012008', studentName: '黃雅琪', classSection: 'afternoon_chinese', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 3.0, chnAvg: 5, courses: 'management,intro_cs', courseCount: 2, itAvg: 3.0, mgmtAvg: 4.8, priorKnowledge: 4.5, intrinsicMotivation: 4.5, extrinsicMotivation: 3.8, motivationType: 'intrinsic', selfEfficacy: 4.0, teamExp: 5, teamRoles: 'facilitator,presenter', worstExperience: '缺乏互動，只有單向講課', specialNeeds: '' },
+        { studentId: '411012009', studentName: '吳建宏', classSection: 'afternoon_chinese', gender: 'male', nationality: 'hongkong', nativeLanguage: 'chinese', engAvg: 3.2, chnAvg: 4.8, courses: 'intro_cs,database', courseCount: 2, itAvg: 4.5, mgmtAvg: 3.2, priorKnowledge: 4.8, intrinsicMotivation: 4.0, extrinsicMotivation: 4.0, motivationType: 'balanced', selfEfficacy: 4.3, teamExp: 4, teamRoles: 'analyzer,implementer', worstExperience: '課程內容與實務脫節', specialNeeds: '' },
+        { studentId: '411012010', studentName: '周佳蓉', classSection: 'afternoon_chinese', gender: 'female', nationality: 'taiwan', nativeLanguage: 'chinese', engAvg: 2.5, chnAvg: 5, courses: 'management,crm', courseCount: 2, itAvg: 2.8, mgmtAvg: 4.0, priorKnowledge: 4.0, intrinsicMotivation: 3.8, extrinsicMotivation: 4.5, motivationType: 'extrinsic', selfEfficacy: 3.0, teamExp: 3, teamRoles: 'researcher,facilitator', worstExperience: '評分標準不清楚', specialNeeds: '視力不好，希望座位前排' }
     ];
     
     cachedStudents = testStudents;
     refreshAdminDisplay();
-    alert('已載入 10 筆測試資料！\n\n請點擊「執行智慧分組」進行分組，\n然後即可下載 Excel 報告。');
+    alert('已載入 10 筆測試資料！\n\n• 早上班（全英語）：5 人\n• 下午班（中文）：5 人\n\n請選擇班級後點擊「執行智慧分組」');
 }
 
 function generateGroups() {
-    if (cachedStudents.length === 0) {
-        alert('目前沒有學生資料！');
+    const classFilter = document.getElementById('classFilter').value;
+    const classStudents = cachedStudents.filter(s => s.classSection === classFilter);
+    
+    if (classStudents.length === 0) {
+        const className = classFilter === 'morning_english' ? '早上班（全英語）' : '下午班（中文）';
+        alert(`${className} 目前沒有學生資料！`);
         return;
     }
     
-    const groupSize = parseInt(document.getElementById('groupSize').value);
     const strategy = document.getElementById('groupStrategy').value;
     
-    const groups = createGroups(cachedStudents, groupSize, strategy);
-    displayGroups(groups);
+    const groups = createGroups(classStudents, 10, strategy);  // 固定 10 組
+    displayGroups(groups, classFilter);
     
     document.getElementById('groupingResults').classList.remove('hidden');
+    
+    // 儲存時記錄班級資訊
+    const groupData = {
+        classSection: classFilter,
+        groups: groups
+    };
     localStorage.setItem('groupingResults', JSON.stringify(groups));
+    localStorage.setItem('groupingClass', classFilter);
 }
 
-function createGroups(students, groupSize, strategy) {
+function createGroups(students, numGroups, strategy) {
     if (students.length === 0) return [];
     
     // 計算綜合分數用於分組
@@ -832,7 +894,7 @@ function createGroups(students, groupSize, strategy) {
     // 排序
     scored.sort((a, b) => b.compositeScore - a.compositeScore);
     
-    const numGroups = Math.ceil(scored.length / groupSize);
+    // 固定 10 組
     const groups = Array.from({ length: numGroups }, () => []);
     
     if (strategy === 'heterogeneous') {
@@ -870,12 +932,19 @@ function createGroups(students, groupSize, strategy) {
         });
     }
     
-    return groups;
+    // 移除空組
+    return groups.filter(g => g.length > 0);
 }
 
-function displayGroups(groups) {
+function displayGroups(groups, classSection) {
     const container = document.getElementById('groupsContainer');
     container.innerHTML = '';
+    
+    const className = classSection === 'morning_english' ? '早上班（全英語）' : '下午班（中文）';
+    const header = document.createElement('h4');
+    header.className = 'groups-class-header';
+    header.textContent = `📋 ${className} - 共 ${groups.length} 組`;
+    container.appendChild(header);
     
     groups.forEach((group, index) => {
         const card = document.createElement('div');

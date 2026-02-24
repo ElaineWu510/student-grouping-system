@@ -119,6 +119,17 @@ textarea { resize: vertical; min-height: 60px; }
 .other-option { flex-wrap: wrap; }
 .inline-input { flex: 1; min-width: 120px; padding: 5px 10px !important; margin-left: 5px; font-size: 0.9rem !important; }
 
+/* Class Section Selection */
+.form-group.full-width { grid-column: span 2; }
+.class-selection { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.class-option { flex-direction: column; align-items: flex-start; padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: var(--radius-sm); transition: all 0.3s; }
+.class-option:hover { border-color: var(--primary-light); background: rgba(30, 58, 95, 0.02); }
+.class-option input:checked + .class-info { color: var(--primary); }
+.class-option:has(input:checked) { border-color: var(--primary); background: rgba(30, 58, 95, 0.05); }
+.class-info { display: flex; flex-direction: column; gap: 5px; margin-left: 10px; }
+.class-time { font-weight: 600; font-size: 1.1rem; }
+.class-lang { font-size: 0.9rem; color: var(--text-light); }
+
 /* Rating Table */
 .rating-table { background: var(--white); border-radius: var(--radius-sm); overflow: hidden; }
 .rating-row { display: flex; align-items: center; padding: 10px 15px; border-bottom: 1px solid #eee; }
@@ -155,7 +166,15 @@ textarea { resize: vertical; min-height: 60px; }
 .btn-secondary:hover { background: var(--primary-light); }
 .btn-success { background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); color: var(--white); box-shadow: 0 4px 15px rgba(39,174,96,0.3); }
 .btn-success:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(39,174,96,0.4); }
+.btn-danger { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); color: var(--white); padding: 5px 10px; font-size: 0.8rem; }
+.btn-danger:hover { background: linear-gradient(135deg, #a93226 0%, #c0392b 100%); }
 .form-actions { text-align: center; padding-top: 20px; }
+
+/* Data Section Header */
+.data-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+.data-filter select { padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid #ddd; }
+.settings-note { margin-top: 10px; color: var(--primary); font-size: 0.9rem; font-weight: 500; }
+.groups-class-header { color: var(--primary); margin-bottom: 15px; font-size: 1.1rem; padding: 10px; background: #f8f9fa; border-radius: var(--radius-sm); }
 
 /* Stats Detail Section */
 .stats-detail-section { background: var(--white); padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 25px; }
