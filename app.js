@@ -4,7 +4,7 @@
 // ==========================================
 
 // ============ 設定 ============
-const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxSWvG_VSBK7-17OOxw5ytkHOAg7B_3_V_0GETVCCsEuRBPziNkiDy5JwCnWVkf-baMAg/exec';
 const ADMIN_SESSION_KEY = 'adminLoggedIn';
 
 let cachedStudents = [];
