@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team-Based Learning 分組資料調查表</title>
+    <title>【早上班】Team-Based Learning 分組資料調查表</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
@@ -15,10 +15,13 @@
         <header class="header">
             <div class="header-content">
                 <h1 class="title">
-                    <span class="title-zh">Team-Based Learning 分組資料調查表</span>
-                    <span class="title-en">Team-Based Learning Grouping Survey</span>
+                    <span class="title-zh">【早上班】Team-Based Learning 分組資料調查表</span>
+                    <span class="title-en">Morning Class — Team-Based Learning Grouping Survey</span>
                 </h1>
                 <p class="subtitle">國立東華大學 資訊管理學系<br>National Dong Hwa University, Department of Information Management</p>
+            </div>
+            <div class="class-banner morning-banner">
+                🌅 早上班 Morning Class &nbsp;|&nbsp; 09:00 - 12:00 &nbsp;|&nbsp; 全英語授課 English-taught
             </div>
             <!-- Hidden admin access -->
             <nav id="navTabs" class="nav-tabs hidden">
@@ -51,7 +54,7 @@
                             <span class="section-number">01</span>
                             基本資料 Basic Information
                         </h3>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="studentId">學號 Student ID <span class="required">*</span></label>
@@ -65,23 +68,8 @@
 
                         <div class="form-row">
                             <div class="form-group full-width">
-                                <label>上課班級 Class Section <span class="required">*</span></label>
-                                <div class="radio-group class-selection">
-                                    <label class="radio-option class-option">
-                                        <input type="radio" name="classSection" value="morning_english" required>
-                                        <div class="class-info">
-                                            <span class="class-time">🌅 09:00 - 12:00</span>
-                                            <span class="class-lang">全英語授課 English-taught Class</span>
-                                        </div>
-                                    </label>
-                                    <label class="radio-option class-option">
-                                        <input type="radio" name="classSection" value="afternoon_chinese">
-                                        <div class="class-info">
-                                            <span class="class-time">🌇 14:00 - 17:00</span>
-                                            <span class="class-lang">中文授課 Chinese-taught Class</span>
-                                        </div>
-                                    </label>
-                                </div>
+                                <label for="email">Email <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" required placeholder="e.g., 41081xxxx@gms.ndhu.edu.tw">
                             </div>
                         </div>
 
@@ -96,35 +84,6 @@
                                     <label class="radio-option">
                                         <input type="radio" name="gender" value="female">
                                         <span>女 Female</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>國籍 Nationality <span class="required">*</span></label>
-                                <div class="radio-group">
-                                    <label class="radio-option">
-                                        <input type="radio" name="nationality" value="taiwan" required>
-                                        <span>台灣 Taiwan</span>
-                                    </label>
-                                    <label class="radio-option">
-                                        <input type="radio" name="nationality" value="china">
-                                        <span>中國大陸 Mainland China</span>
-                                    </label>
-                                    <label class="radio-option">
-                                        <input type="radio" name="nationality" value="hongkong">
-                                        <span>香港 Hong Kong</span>
-                                    </label>
-                                    <label class="radio-option">
-                                        <input type="radio" name="nationality" value="macau">
-                                        <span>澳門 Macau</span>
-                                    </label>
-                                    <label class="radio-option other-option">
-                                        <input type="radio" name="nationality" value="other">
-                                        <span>其他 Other:</span>
-                                        <input type="text" name="nationalityOther" class="inline-input" placeholder="Please specify 請說明">
                                     </label>
                                 </div>
                             </div>
@@ -152,13 +111,13 @@
                         </div>
                     </div>
 
-                    <!-- Part 1.5: Language Proficiency -->
+                    <!-- Part 2: Language Proficiency -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">02</span>
                             語言能力自評 Language Proficiency
                         </h3>
-                        
+
                         <div class="subsection">
                             <h4>英語能力 English Proficiency <span class="required">*</span></h4>
                             <p class="section-desc">請評估您的英語能力（1=非常不好，5=非常好）<br>Please rate your English proficiency (1=Very Poor, 5=Excellent)</p>
@@ -266,7 +225,7 @@
                         </div>
                     </div>
 
-                    <!-- Part 2: Prior Knowledge -->
+                    <!-- Part 3: Prior Knowledge -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">03</span>
@@ -451,7 +410,7 @@
                         </div>
                     </div>
 
-                    <!-- Part 3: Learning Motivation (MSLQ) -->
+                    <!-- Part 4: Learning Motivation (MSLQ) -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">04</span>
@@ -541,7 +500,7 @@
                         </div>
                     </div>
 
-                    <!-- Part 4: Self-Efficacy -->
+                    <!-- Part 5: Self-Efficacy -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">05</span>
@@ -666,7 +625,7 @@
                         </div>
                     </div>
 
-                    <!-- Part 5: Teamwork Preferences -->
+                    <!-- Part 6: Teamwork Preferences -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">06</span>
@@ -775,7 +734,7 @@
                         </div>
                     </div>
 
-                    <!-- Part 6: Open-ended Questions -->
+                    <!-- Part 7: Open-ended Questions -->
                     <div class="form-section">
                         <h3 class="section-title">
                             <span class="section-number">07</span>
@@ -785,33 +744,33 @@
                         <div class="form-group">
                             <label for="bestExperience">30. 最好的學習經驗 Best Learning Experience</label>
                             <p class="field-desc">請描述一次讓您印象深刻的正面學習經驗<br>Please describe a positive learning experience that left a strong impression on you</p>
-                            <textarea id="bestExperience" name="bestExperience" rows="3" 
+                            <textarea id="bestExperience" name="bestExperience" rows="3"
                                 placeholder="Which course? What teaching method? Why did you find it valuable? 什麼課程？什麼教學方式？為什麼讓您覺得有收穫？"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="worstExperience">最差的學習經驗 Worst Learning Experience</label>
                             <p class="field-desc">請描述一次讓您感到挫折或不愉快的學習經驗<br>Please describe a learning experience that was frustrating or unpleasant</p>
-                            <textarea id="worstExperience" name="worstExperience" rows="3" 
+                            <textarea id="worstExperience" name="worstExperience" rows="3"
                                 placeholder="What difficulties did you encounter? What caused the poor learning outcome? 遇到什麼困難？什麼原因導致學習效果不佳？"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="teamLearning">31. 您希望從團隊合作中學到什麼？What do you hope to learn from teamwork?</label>
-                            <textarea id="teamLearning" name="teamLearning" rows="2" 
+                            <textarea id="teamLearning" name="teamLearning" rows="2"
                                 placeholder="請分享您的期望 Please share your expectations"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="teamContribution">32. 您認為自己在團隊中可以貢獻什麼？What do you think you can contribute to a team?</label>
-                            <textarea id="teamContribution" name="teamContribution" rows="2" 
+                            <textarea id="teamContribution" name="teamContribution" rows="2"
                                 placeholder="請分享您的想法 Please share your thoughts"></textarea>
                         </div>
 
                         <div class="form-group">
                             <label for="specialNeeds">33. 對本課程的特別需求 Special Needs for This Course</label>
                             <p class="field-desc">請說明您在修習本課程時是否有任何特別需求或考量（如不願在此說明，也可以私下與教師討論）<br>Please indicate if you have any special needs or considerations. If you prefer not to disclose here, you may discuss privately with the instructor.</p>
-                            <textarea id="specialNeeds" name="specialNeeds" rows="2" 
+                            <textarea id="specialNeeds" name="specialNeeds" rows="2"
                                 placeholder="e.g., learning disability support, religious factors, health conditions, work schedule constraints 例如：學習障礙支持、宗教因素、健康狀況、工作時間限制等"></textarea>
                         </div>
                     </div>
@@ -932,7 +891,7 @@
             </div>
         </section>
 
-        <!-- Admin Section (same as before) -->
+        <!-- Admin Section -->
         <section id="admin" class="section">
             <div id="adminLogin" class="admin-login">
                 <div class="login-card">
@@ -964,9 +923,9 @@
                         <span>🚪</span> 登出
                     </button>
                 </div>
-                
+
                 <div class="admin-header">
-                    <h2>管理後台</h2>
+                    <h2>管理後台 — 早上班</h2>
                     <p>查看學生問卷資料並進行智慧分組</p>
                 </div>
 
@@ -997,7 +956,7 @@
                         <div class="stat-icon">🌍</div>
                         <div class="stat-content">
                             <span class="stat-number" id="intlCount">0</span>
-                            <span class="stat-label">國際學生</span>
+                            <span class="stat-label">外語母語者</span>
                         </div>
                     </div>
                 </div>
@@ -1014,7 +973,7 @@
                                 <div class="stat-row"><span>中文平均 Chinese Avg:</span><span id="avgChnScore">-</span></div>
                             </div>
                         </div>
-                        
+
                         <!-- 先備知識統計 - 前三名課程 -->
                         <div class="stats-card">
                             <h4>📚 先備知識 Prior Knowledge (修課前三名)</h4>
@@ -1128,6 +1087,10 @@
         </footer>
     </div>
 
+    <script>
+        window.CLASS_SECTION = 'morning_english';
+        window.SHEET_NAME = '早上班';
+    </script>
     <script src="app.js"></script>
 </body>
 </html>
