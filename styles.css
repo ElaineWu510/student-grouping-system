@@ -351,6 +351,112 @@ tr:hover { background: #f8f9fa; }
     .stats-card.wide { grid-column: span 1; }
 }
 
+/* ==========================================
+   選課名單比對 Roster Comparison
+   ========================================== */
+.roster-section {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--info);
+}
+.roster-section h3 { margin-bottom: 12px; font-size: 1.1rem; color: var(--primary); }
+
+.roster-upload { margin-bottom: 16px; }
+.roster-upload .section-desc { margin-bottom: 12px; }
+.upload-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.roster-file-info {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    background: #f0f4f8;
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+.roster-file-info strong { color: var(--primary); }
+
+.roster-results { margin-top: 20px; }
+
+.roster-summary {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: #f0f4f8;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+}
+.roster-summary strong { color: var(--primary); font-size: 1.1rem; }
+
+.roster-compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.roster-compare-card {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+.roster-compare-card h4 {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+.roster-compare-card p {
+    padding: 6px 16px 8px;
+    font-size: 0.82rem;
+    color: var(--text-light);
+    margin: 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.not-filled h4  { background: #fde8e8; color: #c0392b; }
+.not-filled     { border-color: #f5c6c6; }
+.not-in-roster h4 { background: #fef3cd; color: #856404; }
+.not-in-roster  { border-color: #fde8a0; }
+
+.count-badge {
+    display: inline-block;
+    min-width: 26px;
+    padding: 1px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: center;
+    margin-left: auto;
+}
+.not-filled .count-badge    { background: #e74c3c; color: #fff; }
+.not-in-roster .count-badge { background: #f39c12; color: #fff; }
+
+.roster-list {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+.roster-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 16px;
+    font-size: 0.88rem;
+    border-bottom: 1px solid #f5f5f5;
+}
+.roster-row:last-child { border-bottom: none; }
+.r-id   { font-weight: 600; color: var(--primary); min-width: 100px; font-family: monospace; }
+.r-name { flex: 1; }
+.r-email { color: var(--text-light); font-size: 0.82rem; }
+.compare-ok { padding: 12px 16px; color: var(--success); font-size: 0.9rem; }
+
+@media (max-width: 768px) {
+    .roster-compare-grid { grid-template-columns: 1fr; }
+}
+
 /* Print */
 @media print {
     .header, .form-actions, .results-actions, .admin-toolbar, .nav-tabs { display: none; }

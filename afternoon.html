@@ -1002,6 +1002,45 @@
                     </div>
                 </div>
 
+                <!-- 選課名單比對 -->
+                <div class="roster-section">
+                    <h3>📋 選課名單比對 Roster Comparison</h3>
+                    <div class="roster-upload">
+                        <p class="section-desc">
+                            上傳選課名單（.xls / .xlsx）來比對：哪些學生尚未填寫問卷，以及哪些填寫者不在選課名單中。<br>
+                            Upload the enrollment list (.xls / .xlsx) to find missing respondents and unregistered submissions.
+                        </p>
+                        <div class="upload-row">
+                            <label class="btn btn-secondary" for="rosterFile" style="cursor:pointer">
+                                <span>📂</span> 上傳選課名單
+                            </label>
+                            <input type="file" id="rosterFile" accept=".xls,.xlsx" style="display:none">
+                            <span id="rosterFileInfo" class="roster-file-info hidden">
+                                已載入：<strong id="rosterFileName">-</strong>（共 <strong id="rosterLoadedCount">0</strong> 人）
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="rosterResults" class="roster-results hidden">
+                        <div class="roster-summary">
+                            <div class="roster-stat">問卷填寫：<strong id="rosterSurveyCount">0</strong> 人</div>
+                            <div class="roster-stat">選課名單：<strong id="rosterTotalCount">0</strong> 人</div>
+                        </div>
+                        <div class="roster-compare-grid">
+                            <div class="roster-compare-card not-filled">
+                                <h4>❌ 尚未填寫問卷 <span class="count-badge" id="notFilledCount">0</span></h4>
+                                <p>在選課名單中，但尚未填寫分組問卷的學生</p>
+                                <div class="roster-list" id="notFilledList"></div>
+                            </div>
+                            <div class="roster-compare-card not-in-roster">
+                                <h4>⚠️ 不在選課名單中 <span class="count-badge" id="notInRosterCount">0</span></h4>
+                                <p>已填寫問卷，但學號不在選課名單中的學生</p>
+                                <div class="roster-list" id="notInRosterList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="admin-actions">
                     <div class="action-group">
                         <h3>分組設定</h3>

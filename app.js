@@ -426,16 +426,19 @@ async function submitToGoogleSheets(studentData) {
 function validateForm() {
     clearAllErrors();
     
+    // morning.html / afternoon.html 設有 window.CLASS_SECTION；index.html 則無
+    const isClassPage = !!window.CLASS_SECTION;
+
     const requiredFields = [
         { name: 'studentId', label: '學號' },
         { name: 'studentName', label: '姓名' },
-        // Email：僅在新版頁面（morning/afternoon）才驗證
-        ...(document.querySelector('[name="email"]') ? [{ name: 'email', label: 'Email' }] : []),
-        // 班級：僅在 index.html（未預設班級）才驗證
-        ...(window.CLASS_SECTION ? [] : [{ name: 'classSection', label: '上課班級', type: 'radio' }]),
+        // 新版頁面驗證 Email；舊版 index.html 驗證班別
+        ...(isClassPage
+            ? [{ name: 'email', label: 'Email' }]
+            : [{ name: 'classSection', label: '上課班級', type: 'radio' }]),
         { name: 'gender', label: '性別', type: 'radio' },
-        // 國籍：僅在 index.html 才驗證
-        ...(document.querySelector('[name="nationality"]') ? [{ name: 'nationality', label: '國籍', type: 'radio' }] : []),
+        // 舊版 index.html 才驗證國籍
+        ...(isClassPage ? [] : [{ name: 'nationality', label: '國籍', type: 'radio' }]),
         { name: 'nativeLanguage', label: '母語', type: 'radio' },
         { name: 'engReading', label: '英語閱讀能力', type: 'radio' },
         { name: 'engListening', label: '英語聽力能力', type: 'radio' },
@@ -669,23 +672,27 @@ function refreshAdminDisplay() {
         ? cachedStudents 
         : cachedStudents.filter(s => s.classSection === filter);
     
-    // 統計總人數（全部）
-    document.getElementById('totalStudents').textContent = cachedStudents.length;
-    document.getElementById('maleCount').textContent = cachedStudents.filter(s => s.gender === 'male').length;
-    document.getElementById('femaleCount').textContent = cachedStudents.filter(s => s.gender === 'female').length;
-    document.getElementById('intlCount').textContent = cachedStudents.filter(s => s.nativeLanguage && s.nativeLanguage !== 'chinese').length;
-    
-    // 計算詳細統計
-    if (cachedStudents.length > 0) {
-        updateDetailedStats();
+    // 統計：依所在頁面班別篩選（morning/afternoon），index.html 則顯示全部
+    const statsStudents = window.CLASS_SECTION
+        ? cachedStudents.filter(s => s.classSection === window.CLASS_SECTION)
+        : cachedStudents;
+
+    document.getElementById('totalStudents').textContent = statsStudents.length;
+    document.getElementById('maleCount').textContent = statsStudents.filter(s => s.gender === 'male').length;
+    document.getElementById('femaleCount').textContent = statsStudents.filter(s => s.gender === 'female').length;
+    document.getElementById('intlCount').textContent = statsStudents.filter(s => s.nativeLanguage && s.nativeLanguage !== 'chinese').length;
+
+    // 計算詳細統計（依班別篩選）
+    if (statsStudents.length > 0) {
+        updateDetailedStats(statsStudents);
     }
-    
+
     const tbody = document.getElementById('studentTableBody');
     tbody.innerHTML = '';
-    
+
     if (filteredStudents.length === 0) {
         tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #7f8c8d;">目前沒有資料</td></tr>';
-        if (cachedStudents.length === 0) resetDetailedStats();
+        if (statsStudents.length === 0) resetDetailedStats();
         return;
     }
     
@@ -711,6 +718,11 @@ function refreshAdminDisplay() {
         `;
         tbody.appendChild(row);
     });
+
+    // 若已載入選課名單，自動更新比對結果
+    if (typeof rosterData !== 'undefined' && rosterData.length > 0) {
+        compareRoster();
+    }
 }
 
 // 監聽表格篩選變更
@@ -747,13 +759,14 @@ async function deleteStudent(studentId) {
     }
 }
 
-function updateDetailedStats() {
-    const n = cachedStudents.length;
+function updateDetailedStats(students) {
+    students = students || cachedStudents;
+    const n = students.length;
     if (n === 0) return;
-    
+
     // 語言能力統計
-    const engScores = cachedStudents.map(s => parseFloat(s.engAvg) || 0).filter(v => v > 0);
-    const chnScores = cachedStudents.map(s => parseFloat(s.chnAvg) || 0).filter(v => v > 0);
+    const engScores = students.map(s => parseFloat(s.engAvg) || 0).filter(v => v > 0);
+    const chnScores = students.map(s => parseFloat(s.chnAvg) || 0).filter(v => v > 0);
     document.getElementById('avgEngScore').textContent = engScores.length > 0 
         ? (engScores.reduce((a, b) => a + b, 0) / engScores.length).toFixed(2) : '-';
     document.getElementById('avgChnScore').textContent = chnScores.length > 0 
@@ -770,7 +783,7 @@ function updateDetailedStats() {
     const courseCounts = {};
     Object.keys(courseNames).forEach(key => courseCounts[key] = 0);
     
-    cachedStudents.forEach(s => {
+    students.forEach(s => {
         if (s.courses) {
             const courses = s.courses.split(',');
             courses.forEach(c => {
@@ -795,7 +808,7 @@ function updateDetailedStats() {
     
     // 最差學習經驗彙整
     const worstExpList = document.getElementById('worstExpList');
-    const worstExps = cachedStudents.filter(s => s.worstExperience && s.worstExperience.trim() !== '');
+    const worstExps = students.filter(s => s.worstExperience && s.worstExperience.trim() !== '');
     
     if (worstExps.length === 0) {
         worstExpList.innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
@@ -810,7 +823,7 @@ function updateDetailedStats() {
     
     // 特別需求彙整
     const specialNeedsList = document.getElementById('specialNeedsList');
-    const specialNeeds = cachedStudents.filter(s => s.specialNeeds && s.specialNeeds.trim() !== '');
+    const specialNeeds = students.filter(s => s.specialNeeds && s.specialNeeds.trim() !== '');
     
     if (specialNeeds.length === 0) {
         specialNeedsList.innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
@@ -832,6 +845,112 @@ function resetDetailedStats() {
     });
     document.getElementById('worstExpList').innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
     document.getElementById('specialNeedsList').innerHTML = '<p class="no-data">尚無資料 No data yet</p>';
+}
+
+// ==========================================
+// 選課名單比對 Roster Comparison
+// ==========================================
+let rosterData = [];
+
+document.getElementById('rosterFile')?.addEventListener('change', handleRosterUpload);
+
+async function handleRosterUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        await loadSheetJS();
+    } catch (e) {
+        alert('載入 Excel 解析庫失敗，請檢查網路連線');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+
+            // 自動偵測 header row：找含有「學號」的列
+            let headerRow = 0;
+            let idCol = 0;
+            let nameCol = 1;
+            let found = false;
+
+            for (let i = 0; i < Math.min(6, rows.length); i++) {
+                for (let j = 0; j < rows[i].length; j++) {
+                    const cell = String(rows[i][j]).trim();
+                    if (cell === '學號') { headerRow = i; idCol = j; found = true; }
+                    if (cell === '姓名') { nameCol = j; }
+                }
+                if (found) break;
+            }
+
+            rosterData = [];
+            for (let i = headerRow + 1; i < rows.length; i++) {
+                const id   = String(rows[i][idCol]   || '').trim();
+                const name = String(rows[i][nameCol] || '').trim();
+                if (id && id.length >= 5) {  // 過濾空列
+                    rosterData.push({ studentId: id, studentName: name });
+                }
+            }
+
+            document.getElementById('rosterFileName').textContent = file.name;
+            document.getElementById('rosterLoadedCount').textContent = rosterData.length;
+            document.getElementById('rosterFileInfo').classList.remove('hidden');
+
+            compareRoster();
+        } catch (err) {
+            console.error('Roster parse error:', err);
+            alert('解析失敗：請確認檔案為 .xls 或 .xlsx 格式');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function compareRoster() {
+    if (rosterData.length === 0) return;
+
+    // 依目前頁面班別篩選問卷資料
+    const classStudents = window.CLASS_SECTION
+        ? cachedStudents.filter(s => s.classSection === window.CLASS_SECTION)
+        : cachedStudents;
+
+    const rosterIds = new Set(rosterData.map(s => s.studentId));
+    const surveyIds  = new Set(classStudents.map(s => s.studentId));
+
+    // 在名單中但未填問卷
+    const notFilled   = rosterData.filter(s => !surveyIds.has(s.studentId));
+    // 有填問卷但不在名單中
+    const notInRoster = classStudents.filter(s => !rosterIds.has(s.studentId));
+
+    document.getElementById('rosterSurveyCount').textContent = classStudents.length;
+    document.getElementById('rosterTotalCount').textContent  = rosterData.length;
+    document.getElementById('notFilledCount').textContent    = notFilled.length;
+    document.getElementById('notInRosterCount').textContent  = notInRoster.length;
+
+    const notFilledList = document.getElementById('notFilledList');
+    notFilledList.innerHTML = notFilled.length === 0
+        ? '<p class="compare-ok">✅ 選課名單上的學生均已填寫問卷！</p>'
+        : notFilled.map(s => `
+            <div class="roster-row">
+                <span class="r-id">${s.studentId}</span>
+                <span class="r-name">${s.studentName}</span>
+            </div>`).join('');
+
+    const notInRosterList = document.getElementById('notInRosterList');
+    notInRosterList.innerHTML = notInRoster.length === 0
+        ? '<p class="compare-ok">✅ 所有填寫者均在選課名單中！</p>'
+        : notInRoster.map(s => `
+            <div class="roster-row">
+                <span class="r-id">${s.studentId}</span>
+                <span class="r-name">${s.studentName}</span>
+                <span class="r-email">${s.email || ''}</span>
+            </div>`).join('');
+
+    document.getElementById('rosterResults').classList.remove('hidden');
 }
 
 // ==========================================
