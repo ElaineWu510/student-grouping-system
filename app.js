@@ -124,9 +124,12 @@ function collectFormData(formData) {
     // 基本資料
     const studentId = formData.get('studentId');
     const studentName = formData.get('studentName');
-    const classSection = formData.get('classSection');
+    // 班級：優先使用頁面預設值（morning.html / afternoon.html），否則從表單讀取
+    const classSection = window.CLASS_SECTION || formData.get('classSection');
     const gender = formData.get('gender');
-    const nationality = formData.get('nationality') === 'other' ? formData.get('nationalityOther') : formData.get('nationality');
+    const email = formData.get('email') || '';
+    // 國籍：新表單不收集，保留向後相容
+    const nationality = formData.get('nationality') === 'other' ? formData.get('nationalityOther') : (formData.get('nationality') || '');
     const nativeLanguage = formData.get('nativeLanguage') === 'other' ? formData.get('nativeLanguageOther') : formData.get('nativeLanguage');
     
     // 英語能力
@@ -210,6 +213,7 @@ function collectFormData(formData) {
         studentName,
         classSection,
         gender,
+        email,
         nationality,
         nativeLanguage,
         
@@ -391,7 +395,7 @@ async function submitToGoogleSheets(studentData) {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'postData';
-        input.value = JSON.stringify({ action: 'submit', studentData });
+        input.value = JSON.stringify({ action: 'submit', sheetName: window.SHEET_NAME || '回覆', studentData });
         form.appendChild(input);
         
         document.body.appendChild(form);
@@ -425,9 +429,13 @@ function validateForm() {
     const requiredFields = [
         { name: 'studentId', label: '學號' },
         { name: 'studentName', label: '姓名' },
-        { name: 'classSection', label: '上課班級', type: 'radio' },
+        // Email：僅在新版頁面（morning/afternoon）才驗證
+        ...(document.querySelector('[name="email"]') ? [{ name: 'email', label: 'Email' }] : []),
+        // 班級：僅在 index.html（未預設班級）才驗證
+        ...(window.CLASS_SECTION ? [] : [{ name: 'classSection', label: '上課班級', type: 'radio' }]),
         { name: 'gender', label: '性別', type: 'radio' },
-        { name: 'nationality', label: '國籍', type: 'radio' },
+        // 國籍：僅在 index.html 才驗證
+        ...(document.querySelector('[name="nationality"]') ? [{ name: 'nationality', label: '國籍', type: 'radio' }] : []),
         { name: 'nativeLanguage', label: '母語', type: 'radio' },
         { name: 'engReading', label: '英語閱讀能力', type: 'radio' },
         { name: 'engListening', label: '英語聽力能力', type: 'radio' },
@@ -643,7 +651,7 @@ async function loadStudentData() {
     }
     
     try {
-        const result = await apiRequest('get_data', { password: adminPassword });
+        const result = await apiRequest('get_data', { password: adminPassword, sheetName: window.SHEET_NAME || '' });
         if (result.success) {
             cachedStudents = result.data || [];
         }
@@ -665,7 +673,7 @@ function refreshAdminDisplay() {
     document.getElementById('totalStudents').textContent = cachedStudents.length;
     document.getElementById('maleCount').textContent = cachedStudents.filter(s => s.gender === 'male').length;
     document.getElementById('femaleCount').textContent = cachedStudents.filter(s => s.gender === 'female').length;
-    document.getElementById('intlCount').textContent = cachedStudents.filter(s => s.nationality !== 'taiwan').length;
+    document.getElementById('intlCount').textContent = cachedStudents.filter(s => s.nativeLanguage && s.nativeLanguage !== 'chinese').length;
     
     // 計算詳細統計
     if (cachedStudents.length > 0) {
@@ -694,7 +702,7 @@ function refreshAdminDisplay() {
             <td>${s.studentId || '-'}</td>
             <td>${s.studentName || '-'}</td>
             <td>${s.gender === 'male' ? '男' : s.gender === 'female' ? '女' : '-'}</td>
-            <td>${s.nationality || '-'}</td>
+            <td>${s.email || '-'}</td>
             <td>${s.priorKnowledge || '-'}</td>
             <td>${s.itAvg || '-'}</td>
             <td>${motivationTypes[s.motivationType] || '-'}</td>
@@ -845,7 +853,6 @@ function loadTestData() {
     
     const courseOptions = ['management', 'intro_cs', 'database', 'crm', 'ecommerce'];
     const roleOptions = ['leader', 'ideator', 'implementer', 'analyzer', 'facilitator', 'researcher', 'presenter'];
-    const nationalities = ['taiwan', 'taiwan', 'taiwan', 'taiwan', 'china', 'hongkong', 'macau', 'other'];
     
     const worstExperiences = [
         '老師上課太快，跟不上進度',
@@ -883,19 +890,17 @@ function loadTestData() {
         const classSection = isEnglishClass ? 'morning_english' : 'afternoon_chinese';
         const isForeign = Math.random() < (isEnglishClass ? 0.3 : 0.1);
         
-        let studentName, nationality, nativeLanguage, engAvg, chnAvg;
-        
+        let studentName, nativeLanguage, engAvg, chnAvg;
+
         if (isForeign) {
-            studentName = engFirstNames[Math.floor(Math.random() * engFirstNames.length)] + ' ' + 
+            studentName = engFirstNames[Math.floor(Math.random() * engFirstNames.length)] + ' ' +
                          engLastNames[Math.floor(Math.random() * engLastNames.length)];
-            nationality = 'other';
             nativeLanguage = Math.random() < 0.7 ? 'english' : 'other';
             engAvg = (4 + Math.random()).toFixed(2);
             chnAvg = (1 + Math.random() * 2).toFixed(2);
         } else {
-            studentName = firstNames[Math.floor(Math.random() * firstNames.length)] + 
+            studentName = firstNames[Math.floor(Math.random() * firstNames.length)] +
                          lastNames[Math.floor(Math.random() * lastNames.length)];
-            nationality = nationalities[Math.floor(Math.random() * 4)]; // 主要是台灣
             nativeLanguage = 'chinese';
             engAvg = isEnglishClass ? (3.5 + Math.random() * 1.5).toFixed(2) : (2 + Math.random() * 2).toFixed(2);
             chnAvg = (4.5 + Math.random() * 0.5).toFixed(2);
@@ -925,12 +930,13 @@ function loadTestData() {
             motivationType = 'extrinsic';
         }
         
+        const studentIdNum = `41101${String(2001 + i).slice(-4)}`;
         testStudents.push({
-            studentId: `41101${String(2001 + i).slice(-4)}`,
+            studentId: studentIdNum,
             studentName: studentName,
             classSection: classSection,
             gender: gender,
-            nationality: nationality,
+            email: `${studentIdNum}@gms.ndhu.edu.tw`,
             nativeLanguage: nativeLanguage,
             engAvg: parseFloat(engAvg),
             chnAvg: parseFloat(chnAvg),
@@ -1212,10 +1218,11 @@ function downloadCSV() {
         return;
     }
     
-    let csv = '\uFEFF學號,姓名,性別,國籍,英語平均,先備知識,IT能力,管理知識,內在動機,外在動機,動機類型,自我效能,團隊經驗\n';
-    
+    let csv = '\uFEFF學號,姓名,Email,性別,母語,英語平均,先備知識,IT能力,管理知識,內在動機,外在動機,動機類型,自我效能,團隊經驗\n';
+
     cachedStudents.forEach(s => {
-        csv += `${s.studentId},${s.studentName},${s.gender},${s.nationality},${s.engAvg},${s.priorKnowledge},${s.itAvg},${s.mgmtAvg},${s.intrinsicMotivation},${s.extrinsicMotivation},${s.motivationType},${s.selfEfficacy},${s.teamExp}\n`;
+        const emailVal = (s.email || '').replace(/,/g, '');
+        csv += `${s.studentId},${s.studentName},${emailVal},${s.gender},${s.nativeLanguage || ''},${s.engAvg},${s.priorKnowledge},${s.itAvg},${s.mgmtAvg},${s.intrinsicMotivation},${s.extrinsicMotivation},${s.motivationType},${s.selfEfficacy},${s.teamExp}\n`;
     });
     
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });

@@ -47,6 +47,31 @@ body {
 .title-en { display: block; font-family: 'Playfair Display', serif; font-size: 1rem; opacity: 0.9; }
 .subtitle { font-size: 1rem; opacity: 0.8; }
 
+/* Class Banner */
+.class-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 1px;
+    margin: 0 auto 16px;
+    max-width: 600px;
+}
+.class-banner.morning-banner {
+    background: rgba(39, 174, 96, 0.2);
+    border: 1px solid rgba(39, 174, 96, 0.5);
+    color: #d4efdf;
+}
+.class-banner.afternoon-banner {
+    background: rgba(230, 126, 34, 0.2);
+    border: 1px solid rgba(230, 126, 34, 0.5);
+    color: #fde8c8;
+}
+
 /* Navigation */
 .nav-tabs { display: flex; justify-content: center; gap: 10px; }
 .nav-tabs.hidden { display: none; }
