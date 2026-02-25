@@ -900,14 +900,15 @@ async function handleRosterUpload(event) {
                 if (found) break;
             }
 
-            rosterData = [];
+            const seenIds = new Map();
             for (let i = headerRow + 1; i < rows.length; i++) {
                 const id   = String(rows[i][idCol]   || '').trim();
                 const name = String(rows[i][nameCol] || '').trim();
-                if (id && id.length >= 5) {  // 過濾空列
-                    rosterData.push({ studentId: id, studentName: name });
+                if (id && id.length >= 5 && !seenIds.has(id)) {  // 過濾空列並依學號去重複
+                    seenIds.set(id, { studentId: id, studentName: name });
                 }
             }
+            rosterData = Array.from(seenIds.values());
 
             document.getElementById('rosterFileName').textContent = file.name;
             document.getElementById('rosterLoadedCount').textContent = rosterData.length;
