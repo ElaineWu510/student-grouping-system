@@ -1025,13 +1025,22 @@
                         <div class="roster-summary">
                             <div class="roster-stat">問卷填寫：<strong id="rosterSurveyCount">0</strong> 人</div>
                             <div class="roster-stat">選課名單：<strong id="rosterTotalCount">0</strong> 人</div>
+                            <div class="roster-stat">已填寫：<strong id="alreadyFilledCount">0</strong> 人</div>
+                            <div class="roster-stat">未填寫：<strong id="notFilledCount">0</strong> 人</div>
                         </div>
                         <div class="roster-compare-grid">
+                            <div class="roster-compare-card already-filled">
+                                <h4>✅ 已填寫問卷 <span class="count-badge" id="alreadyFilledBadge">0</span></h4>
+                                <p>在選課名單中，且已填寫分組問卷的學生</p>
+                                <div class="roster-list" id="alreadyFilledList"></div>
+                            </div>
                             <div class="roster-compare-card not-filled">
-                                <h4>❌ 尚未填寫問卷 <span class="count-badge" id="notFilledCount">0</span></h4>
+                                <h4>❌ 尚未填寫問卷 <span class="count-badge" id="notFilledBadge">0</span></h4>
                                 <p>在選課名單中，但尚未填寫分組問卷的學生</p>
                                 <div class="roster-list" id="notFilledList"></div>
                             </div>
+                        </div>
+                        <div class="roster-compare-extra">
                             <div class="roster-compare-card not-in-roster">
                                 <h4>⚠️ 不在選課名單中 <span class="count-badge" id="notInRosterCount">0</span></h4>
                                 <p>已填寫問卷，但學號不在選課名單中的學生</p>
@@ -1049,7 +1058,7 @@
                                 分組班級：
                                 <select id="classFilter">
                                     <option value="morning_english">早上班 (全英語)</option>
-                                    <option value="afternoon_chinese">下午班 (中文)</option>
+                                    <option value="afternoon_chinese" selected>下午班 (中文)</option>
                                 </select>
                             </label>
                             <label>

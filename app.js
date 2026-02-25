@@ -472,11 +472,15 @@ function validateForm() {
         { name: 'se24', label: '自我效能第24題', type: 'radio' },
         { name: 'se25', label: '自我效能第25題', type: 'radio' },
         { name: 'se26', label: '自我效能第26題', type: 'radio' },
-        { name: 'teamExp', label: '團隊合作經驗', type: 'radio' }
+        { name: 'teamExp', label: '團隊合作經驗', type: 'radio' },
+        { name: 'bestExperience', label: '最好的學習經驗（第30題）' },
+        { name: 'worstExperience', label: '最差的學習經驗' },
+        { name: 'teamLearning', label: '希望從團隊合作中學到什麼（第31題）' },
+        { name: 'teamContribution', label: '您在團隊中可以貢獻什麼（第32題）' }
     ];
-    
+
     const missing = [];
-    
+
     requiredFields.forEach(field => {
         if (field.type === 'radio') {
             const checked = document.querySelector(`input[name="${field.name}"]:checked`);
@@ -492,17 +496,18 @@ function validateForm() {
             }
         }
     });
-    
+
     if (missing.length > 0) {
-        alert(`請填寫以下必填欄位（共 ${missing.length} 項未填）：\n\n• ` + missing.slice(0, 5).map(f => f.label).join('\n• ') + (missing.length > 5 ? `\n... 及其他 ${missing.length - 5} 項` : ''));
-        
+        const fieldList = missing.map(f => `• ${f.label}`).join('\n');
+        alert(`請填寫以下必填欄位（共 ${missing.length} 項未填）：\n\nPlease complete the following required fields:\n\n${fieldList}`);
+
         const firstError = document.querySelector('.form-error');
         if (firstError) {
             firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         return false;
     }
-    
+
     return true;
 }
 
@@ -513,18 +518,25 @@ function highlightField(name, type) {
     } else {
         element = document.querySelector(`[name="${name}"]`);
     }
-    
+
     if (element) {
-        const container = element.closest('.rating-row') || element.closest('.likert-item') || 
+        const container = element.closest('.rating-row') || element.closest('.likert-item') ||
                          element.closest('.form-group') || element.closest('.radio-group');
         if (container) {
             container.classList.add('form-error');
+            if (!container.querySelector('.error-hint')) {
+                const hint = document.createElement('span');
+                hint.className = 'error-hint error-message';
+                hint.textContent = '此欄位為必填 / This field is required';
+                container.appendChild(hint);
+            }
         }
     }
 }
 
 function clearAllErrors() {
     document.querySelectorAll('.form-error').forEach(el => el.classList.remove('form-error'));
+    document.querySelectorAll('.error-hint').forEach(el => el.remove());
 }
 
 // ==========================================
@@ -921,30 +933,46 @@ function compareRoster() {
     const rosterIds = new Set(rosterData.map(s => s.studentId));
     const surveyIds  = new Set(classStudents.map(s => s.studentId));
 
+    // 在名單中且已填問卷
+    const alreadyFilled = rosterData.filter(s => surveyIds.has(s.studentId));
     // 在名單中但未填問卷
     const notFilled   = rosterData.filter(s => !surveyIds.has(s.studentId));
     // 有填問卷但不在名單中
     const notInRoster = classStudents.filter(s => !rosterIds.has(s.studentId));
 
-    document.getElementById('rosterSurveyCount').textContent = classStudents.length;
-    document.getElementById('rosterTotalCount').textContent  = rosterData.length;
-    document.getElementById('notFilledCount').textContent    = notFilled.length;
-    document.getElementById('notInRosterCount').textContent  = notInRoster.length;
+    document.getElementById('rosterSurveyCount').textContent   = classStudents.length;
+    document.getElementById('rosterTotalCount').textContent    = rosterData.length;
+    document.getElementById('alreadyFilledCount').textContent  = alreadyFilled.length;
+    document.getElementById('alreadyFilledBadge').textContent  = alreadyFilled.length;
+    document.getElementById('notFilledCount').textContent      = notFilled.length;
+    document.getElementById('notFilledBadge').textContent      = notFilled.length;
+    document.getElementById('notInRosterCount').textContent    = notInRoster.length;
+
+    const alreadyFilledList = document.getElementById('alreadyFilledList');
+    alreadyFilledList.innerHTML = alreadyFilled.length === 0
+        ? '<p class="compare-ok">尚無在選課名單中的已填寫學生</p>'
+        : alreadyFilled.map(s => `
+            <div class="roster-row roster-row--filled">
+                <span class="r-id">${s.studentId}</span>
+                <span class="r-name">${s.studentName}</span>
+                <span class="r-status">✅</span>
+            </div>`).join('');
 
     const notFilledList = document.getElementById('notFilledList');
     notFilledList.innerHTML = notFilled.length === 0
         ? '<p class="compare-ok">✅ 選課名單上的學生均已填寫問卷！</p>'
         : notFilled.map(s => `
-            <div class="roster-row">
+            <div class="roster-row roster-row--missing">
                 <span class="r-id">${s.studentId}</span>
                 <span class="r-name">${s.studentName}</span>
+                <span class="r-status">❌</span>
             </div>`).join('');
 
     const notInRosterList = document.getElementById('notInRosterList');
     notInRosterList.innerHTML = notInRoster.length === 0
         ? '<p class="compare-ok">✅ 所有填寫者均在選課名單中！</p>'
         : notInRoster.map(s => `
-            <div class="roster-row">
+            <div class="roster-row roster-row--extra">
                 <span class="r-id">${s.studentId}</span>
                 <span class="r-name">${s.studentName}</span>
                 <span class="r-email">${s.email || ''}</span>
