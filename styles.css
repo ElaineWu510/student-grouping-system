@@ -416,10 +416,24 @@ tr:hover { background: #f8f9fa; }
     margin: 0;
     border-bottom: 1px solid rgba(0,0,0,0.06);
 }
+.already-filled h4  { background: #d4edda; color: #155724; }
+.already-filled     { border-color: #c3e6cb; }
 .not-filled h4  { background: #fde8e8; color: #c0392b; }
 .not-filled     { border-color: #f5c6c6; }
 .not-in-roster h4 { background: #fef3cd; color: #856404; }
 .not-in-roster  { border-color: #fde8a0; }
+
+.roster-compare-extra {
+    margin-top: 16px;
+}
+.roster-compare-extra .roster-compare-card {
+    max-width: 100%;
+}
+
+.r-status { font-size: 1rem; margin-left: 8px; }
+.roster-row--filled  { background: #f0fff4; }
+.roster-row--missing { background: #fff5f5; }
+.roster-row--extra   { background: #fffbf0; }
 
 .count-badge {
     display: inline-block;
@@ -431,6 +445,7 @@ tr:hover { background: #f8f9fa; }
     text-align: center;
     margin-left: auto;
 }
+.already-filled .count-badge { background: #27ae60; color: #fff; }
 .not-filled .count-badge    { background: #e74c3c; color: #fff; }
 .not-in-roster .count-badge { background: #f39c12; color: #fff; }
 
