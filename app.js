@@ -885,20 +885,52 @@ async function handleRosterUpload(event) {
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
 
-            // 自動偵測 header row：找含有「學號」的列
+            // 自動偵測 header row：三段式 fallback
             let headerRow = 0;
-            let idCol = 0;
-            let nameCol = 1;
-            let found = false;
+            let idCol     = -1;   // -1 = not yet detected
+            let nameCol   = -1;
 
-            for (let i = 0; i < Math.min(6, rows.length); i++) {
+            const SCAN_ROWS = Math.min(10, rows.length);
+
+            // Pass 1 – exact match
+            for (let i = 0; i < SCAN_ROWS; i++) {
                 for (let j = 0; j < rows[i].length; j++) {
                     const cell = String(rows[i][j]).trim();
-                    if (cell === '學號') { headerRow = i; idCol = j; found = true; }
-                    if (cell === '姓名') { nameCol = j; }
+                    if (cell === '學號') { headerRow = i; idCol   = j; }
+                    if (cell === '姓名') {                nameCol = j; }
                 }
-                if (found) break;
+                if (idCol !== -1 && nameCol !== -1) break;
             }
+
+            // Pass 2 – partial match (handles BOM / extra chars around 學號)
+            if (idCol === -1 || nameCol === -1) {
+                for (let i = 0; i < SCAN_ROWS; i++) {
+                    for (let j = 0; j < rows[i].length; j++) {
+                        const cell = String(rows[i][j]).trim();
+                        if (idCol   === -1 && cell.includes('學號')) { headerRow = i; idCol   = j; }
+                        if (nameCol === -1 && cell.includes('姓名')) {                nameCol = j; }
+                    }
+                    if (idCol !== -1 && nameCol !== -1) break;
+                }
+            }
+
+            // Pass 3 – auto-detect by content pattern (Taiwan student IDs: 7-12 digit strings)
+            if (idCol === -1) {
+                const dataStart = headerRow + 1;
+                const sampleEnd = Math.min(dataStart + 5, rows.length);
+                outer: for (let j = 0; j < (rows[dataStart] || []).length; j++) {
+                    for (let i = dataStart; i < sampleEnd; i++) {
+                        if (/^\d{7,12}$/.test(String(rows[i][j]).trim())) {
+                            idCol = j;
+                            break outer;
+                        }
+                    }
+                }
+            }
+
+            // Final fallbacks
+            if (idCol   === -1) idCol   = 0;
+            if (nameCol === -1) nameCol = idCol + 1;
 
             const seenIds = new Map();
             for (let i = headerRow + 1; i < rows.length; i++) {
